@@ -19,15 +19,12 @@ func (r *SubscriptionRepository) Create(sub domain.Subscription) (domain.Subscri
 		INSERT INTO subscriptions (user_id, plan, quota_limit, quota_used, rate_limit_per_min)
 		VALUES (?, ?, ?, ?, ?)
 	`, sub.UserID, sub.Plan, sub.QuotaLimit, sub.QuotaUsed, sub.RateLimitPerMin)
+
 	if err != nil {
 		return sub, err
 	}
 
-	id, err := res.LastInsertId()
-	if err != nil {
-		return sub, err
-	}
-
+	id, _ := res.LastInsertId()
 	sub.ID = id
 	return sub, nil
 }
@@ -51,6 +48,7 @@ func (r *SubscriptionRepository) GetByUserID(userID int64) (domain.Subscription,
 	return sub, err
 }
 
+// ✅ ตัวนี้แหละที่ Go หาไม่เจอ
 func (r *SubscriptionRepository) Update(sub domain.Subscription) error {
 	_, err := r.db.Exec(`
 		UPDATE subscriptions

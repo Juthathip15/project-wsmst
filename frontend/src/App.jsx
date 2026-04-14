@@ -4,14 +4,18 @@ import {
   getPatientHistory,
   getPatients,
   getProfile,
+  getUsage,
   login,
   register,
 } from "./api/api";
+
 import AnalysisResult from "./components/AnalysisResult";
 import HealthRecordForm from "./components/HealthRecordForm";
 import LoginForm from "./components/LoginForm";
 import PatientList from "./components/PatientList";
 import RegisterForm from "./components/RegisterForm";
+import UsageDashboard from "./components/UsageDashboard";
+import PricingPage from "./components/PricingPage";
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -19,9 +23,11 @@ export default function App() {
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [history, setHistory] = useState([]);
+  const [usage, setUsage] = useState(null);
   const [loadingPatients, setLoadingPatients] = useState(false);
   const [error, setError] = useState("");
   const [isRegister, setIsRegister] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
 
   async function handleLogin(email, password) {
     const data = await login(email, password);
@@ -61,9 +67,20 @@ export default function App() {
     }
   }
 
+  async function loadUsage(currentToken = token) {
+    try {
+      const data = await getUsage(currentToken);
+      setUsage(data);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Failed to load usage");
+    }
+  }
+
   async function handleCreateRecord(payload) {
     await createHealthRecord(token, payload);
     await loadHistory(payload.patientId);
+    await loadUsage(token);
   }
 
   function handleLogout() {
@@ -73,13 +90,16 @@ export default function App() {
     setPatients([]);
     setSelectedPatient(null);
     setHistory([]);
+    setUsage(null);
     setError("");
     setIsRegister(false);
+    setShowPricing(false);
   }
 
   useEffect(() => {
     if (token) {
       loadPatients(token);
+      loadUsage(token);
     }
   }, [token]);
 
@@ -129,7 +149,16 @@ export default function App() {
   return (
     <div className="container">
       <div className="topbar">
-        <h1>Health Data Platform</h1>
+        <div className="topbar-left">
+          <h1>Health Data Platform</h1>
+          <button
+            className="secondary-btn"
+            onClick={() => setShowPricing(!showPricing)}
+          >
+            {showPricing ? "Back to Dashboard" : "View Pricing"}
+          </button>
+        </div>
+
         <div className="topbar-right">
           <span>{user?.fullName || "User"}</span>
           <button onClick={handleLogout}>Logout</button>
@@ -137,20 +166,39 @@ export default function App() {
       </div>
 
       {error && <p className="error">{error}</p>}
-      {loadingPatients && <p>Loading patients...</p>}
 
-      <div className="grid">
-        <PatientList
-          patients={patients}
-          selectedPatientId={selectedPatient?.id}
-          onSelectPatient={setSelectedPatient}
-        />
-        <HealthRecordForm
-          patient={selectedPatient}
-          onCreateRecord={handleCreateRecord}
-        />
-        <AnalysisResult history={history} />
-      </div>
+      {showPricing ? (
+        <PricingPage
+  token={token}
+  currentPlan={usage?.plan || user?.plan || "basic"}
+  onPlanChanged={async () => {
+    await loadUsage(token);
+    const profile = await getProfile(token);
+    setUser(profile);
+  }}
+/>
+      ) : (
+        <>
+          {loadingPatients && <p>Loading patients...</p>}
+
+          <div className="grid">
+            <PatientList
+              patients={patients}
+              selectedPatientId={selectedPatient?.id}
+              onSelectPatient={setSelectedPatient}
+            />
+
+            <HealthRecordForm
+              patient={selectedPatient}
+              onCreateRecord={handleCreateRecord}
+            />
+
+            <AnalysisResult history={history} />
+
+            <UsageDashboard usage={usage} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

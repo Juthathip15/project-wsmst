@@ -25,13 +25,11 @@ type ServiceRepository interface {
 type CategoryRepository interface {
 	GetAll() ([]Category, error)
 }
-
 type SubscriptionRepository interface {
 	Create(sub Subscription) (Subscription, error)
 	GetByUserID(userID int64) (Subscription, error)
 	Update(sub Subscription) error
 }
-
 type UsageRepository interface {
 	Create(log UsageLog) error
 	CountByUserID(userID int64) (int, error)

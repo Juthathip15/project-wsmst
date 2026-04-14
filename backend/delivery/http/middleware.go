@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 
 	internalauth "project-wsmst-backend/internal/auth"
 	"project-wsmst-backend/usecase"
@@ -52,15 +54,14 @@ func CORSMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
-func SubscriptionMiddleware(
+
+func QuotaMiddleware(
 	subUsecase *usecase.SubscriptionUsecase,
 	usageUsecase *usecase.UsageUsecase,
 ) func(http.Handler) http.Handler {
-
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-			userID, ok := r.Context().Value("userID").(int64)
+			userID, ok := r.Context().Value(UserIDContextKey).(int64)
 			if !ok {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return
@@ -72,34 +73,42 @@ func SubscriptionMiddleware(
 				return
 			}
 
-			// 🔥 QUOTA CHECK
-			if sub.QuotaUsed >= sub.QuotaLimit {
+			summary, err := usageUsecase.GetSummary(userID)
+			if err != nil {
+				http.Error(w, "failed to check usage", http.StatusInternalServerError)
+				return
+			}
+
+			if sub.Plan != "gold" && summary.QuotaUsed >= sub.QuotaLimit {
 				http.Error(w, "quota exceeded", http.StatusTooManyRequests)
 				return
 			}
 
-			// 🔥 RATE LIMIT (ง่าย ๆ version)
-			// TODO: สามารถ optimize เป็น sliding window ได้
-			if sub.RateLimitPerMin <= 0 {
-				http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
-				return
-			}
-
-			// ผ่าน → ไป handler
 			next.ServeHTTP(w, r)
 
-			// 🔥 หลัง request → บันทึก usage
-			subUsecase.IncrementUsage(userID)
-			usageUsecase.Log(userID, r.URL.Path)
+			if err := usageUsecase.Log(userID, r.URL.Path, r.Method); err != nil {
+				println("usage log failed:", err.Error())
+			}
 		})
 	}
 }
-func QuotaMiddleware(subUsecase *usecase.SubscriptionUsecase) func(http.Handler) http.Handler {
+
+type userRateWindow struct {
+	WindowStart time.Time
+	Count       int
+}
+
+var (
+	rateLimitStore = map[int64]*userRateWindow{}
+	rateLimitMu    sync.Mutex
+)
+
+func RateLimitMiddleware(
+	subUsecase *usecase.SubscriptionUsecase,
+) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-			// ดึง userID จาก JWT context
-			userID, ok := r.Context().Value("userID").(int64)
+			userID, ok := r.Context().Value(UserIDContextKey).(int64)
 			if !ok {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return
@@ -107,19 +116,44 @@ func QuotaMiddleware(subUsecase *usecase.SubscriptionUsecase) func(http.Handler)
 
 			sub, err := subUsecase.GetByUserID(userID)
 			if err != nil {
-				http.Error(w, "subscription not found", 403)
+				http.Error(w, "subscription not found", http.StatusForbidden)
 				return
 			}
 
-			// 🚨 check quota
-			if sub.Plan != "gold" && sub.QuotaUsed >= sub.QuotaLimit {
-				http.Error(w, "quota exceeded", 429)
+			limit := sub.RateLimitPerMin
+			if limit <= 0 {
+				http.Error(w, "rate limit not configured", http.StatusTooManyRequests)
 				return
 			}
 
-			// ✅ เพิ่ม usage
-			_ = subUsecase.IncrementUsage(userID)
+			now := time.Now()
 
+			rateLimitMu.Lock()
+			defer rateLimitMu.Unlock()
+
+			window, exists := rateLimitStore[userID]
+			if !exists {
+				rateLimitStore[userID] = &userRateWindow{
+					WindowStart: now,
+					Count:       1,
+				}
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			if now.Sub(window.WindowStart) >= time.Minute {
+				window.WindowStart = now
+				window.Count = 1
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			if window.Count >= limit {
+				http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
+				return
+			}
+
+			window.Count++
 			next.ServeHTTP(w, r)
 		})
 	}

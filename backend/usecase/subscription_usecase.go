@@ -21,6 +21,29 @@ func (u *SubscriptionUsecase) IncrementUsage(userID int64) error {
 	}
 
 	sub.QuotaUsed++
-
 	return u.repo.Update(sub)
+}
+
+func (u *SubscriptionUsecase) CreateOrUpdate(userID int64, plan string) domain.Subscription {
+	config := GetPlanConfig(plan)
+
+	sub, err := u.repo.GetByUserID(userID)
+	if err != nil {
+		newSub := domain.Subscription{
+			UserID:          userID,
+			Plan:            plan,
+			QuotaLimit:      config.QuotaLimit,
+			QuotaUsed:       0,
+			RateLimitPerMin: config.RateLimitPerMin,
+		}
+		res, _ := u.repo.Create(newSub)
+		return res
+	}
+
+	sub.Plan = plan
+	sub.QuotaLimit = config.QuotaLimit
+	sub.RateLimitPerMin = config.RateLimitPerMin
+
+	_ = u.repo.Update(sub)
+	return sub
 }

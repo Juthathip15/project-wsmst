@@ -1,85 +1,65 @@
 package http
 
-import "net/http"
+import (
+	nethttp "net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"project-wsmst-backend/usecase"
+)
 
 func NewRouter(
 	authHandler *AuthHandler,
 	patientHandler *PatientHandler,
 	recordHandler *HealthRecordHandler,
 	serviceHandler *ServiceHandler,
-) http.Handler {
-	mux := http.NewServeMux()
+	usageHandler *UsageHandler,
+	subscriptionHandler *SubscriptionHandler,
+	subUsecase *usecase.SubscriptionUsecase,
+	usageUsecase *usecase.UsageUsecase,
+) nethttp.Handler {
+	r := chi.NewRouter()
 
-	mux.HandleFunc("/api/register", authHandler.Register)
-	mux.HandleFunc("/api/login", authHandler.Login)
-	mux.Handle("/api/profile", AuthMiddleware(http.HandlerFunc(authHandler.Profile)))
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.StripSlashes)
 
-	mux.Handle("/api/patients", AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			patientHandler.List(w, r)
-		case http.MethodPost:
-			patientHandler.Create(w, r)
-		default:
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		}
-	})))
-
-	mux.Handle("/api/patients/", AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet && len(r.URL.Path) > len("/api/patients/") {
-			if hasHistoryPath(r.URL.Path) {
-				recordHandler.ListByPatientID(w, r)
-				return
-			}
-			patientHandler.GetByID(w, r)
-			return
-		}
-		http.NotFound(w, r)
-	})))
-
-	mux.Handle("/api/health-records", AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
-			recordHandler.Create(w, r)
-			return
-		}
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-	})))
-
-	// API as a Product: services
-	mux.Handle("/api/v1/services", AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			serviceHandler.List(w, r)
-		case http.MethodPost:
-			serviceHandler.Create(w, r)
-		default:
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		}
-	})))
-
-	mux.Handle("/api/v1/services/search", AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet {
-			serviceHandler.Search(w, r)
-			return
-		}
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-	})))
-
-	mux.Handle("/api/v1/services/", AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet {
-			serviceHandler.GetByID(w, r)
-			return
-		}
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-	})))
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("API is running"))
+	r.Get("/health", func(w nethttp.ResponseWriter, r *nethttp.Request) {
+		w.WriteHeader(nethttp.StatusOK)
+		w.Write([]byte("ok"))
 	})
 
-	return mux
-}
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Post("/register", authHandler.Register)
+		r.Post("/login", authHandler.Login)
 
-func hasHistoryPath(path string) bool {
-	return len(path) > 0 && path[len(path)-8:] == "/history"
+		r.Group(func(r chi.Router) {
+			r.Use(AuthMiddleware)
+
+			r.Get("/profile", authHandler.Profile)
+
+			r.Post("/patients", patientHandler.Create)
+			r.Get("/patients", patientHandler.List)
+			r.Get("/patients/{id}", patientHandler.GetByID)
+
+			r.Post("/health-records", recordHandler.Create)
+			r.Get("/patients/{id}/history", recordHandler.ListByPatientID)
+
+			r.Get("/usage", usageHandler.GetUsage)
+			r.Post("/subscriptions", subscriptionHandler.Create)
+
+			r.Route("/services", func(r chi.Router) {
+				r.Use(
+					RateLimitMiddleware(subUsecase),
+					QuotaMiddleware(subUsecase, usageUsecase),
+				)
+
+				r.Get("", serviceHandler.List)
+				r.Get("/search", serviceHandler.Search)
+				r.Get("/{id}", serviceHandler.GetByID)
+			})
+		})
+	})
+
+	return r
 }

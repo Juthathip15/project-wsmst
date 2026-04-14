@@ -1,25 +1,26 @@
 package usecase
 
 type PlanConfig struct {
-	Name        string
-	Quota       int
-	RatePerMin  int
+	QuotaLimit      int
+	RateLimitPerMin int
 }
 
-var Plans = map[string]PlanConfig{
-	"basic": {
-		Name:       "basic",
-		Quota:      1000,
-		RatePerMin: 10,
-	},
-	"silver": {
-		Name:       "silver",
-		Quota:      50000,
-		RatePerMin: 100,
-	},
-	"gold": {
-		Name:       "gold",
-		Quota:      999999999,
-		RatePerMin: 1000,
-	},
+func GetPlanConfig(plan string) PlanConfig {
+	switch plan {
+	case "silver":
+		return PlanConfig{
+			QuotaLimit:      50000,
+			RateLimitPerMin: 100,
+		}
+	case "gold":
+		return PlanConfig{
+			QuotaLimit:      999999999,
+			RateLimitPerMin: 1000,
+		}
+	default:
+		return PlanConfig{
+			QuotaLimit:      1000,
+			RateLimitPerMin: 10,
+		}
+	}
 }
