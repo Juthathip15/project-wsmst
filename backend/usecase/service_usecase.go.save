@@ -1,0 +1,33 @@
+package usecase
+
+import "project-wsmst-backend/domain"
+
+type ServiceUsecase struct {
+	serviceRepo domain.ServiceRepository
+}
+
+func NewServiceUsecase(serviceRepo domain.ServiceRepository) *ServiceUsecase {
+	return &ServiceUsecase{serviceRepo: serviceRepo}
+}
+
+func (u *ServiceUsecase) List() ([]domain.Service, error) {
+	return u.serviceRepo.List()
+}
+
+func (u *ServiceUsecase) GetByID(id int64) (domain.Service, error) {
+	return u.serviceRepo.GetByID(id)
+}
+
+func (u *ServiceUsecase) Create(name, description string, categoryID int64, price float64, provider string) (domain.Service, error) {
+	service := domain.Service{
+		Name:        name,
+		Description: description		CategoryID:  categoryID,
+		Price:       price,
+		Provider:    provider,
+	}
+	return u.serviceRepo.Create(service)
+}
+
+func (u *ServiceUsecase) Search(q, category string, minPrice, maxPrice float64, sort string, page, limit int) ([]domain.Service, error) {
+	return u.serviceRepo.Search(q, category, minPrice, maxPrice, sort, page, limit)
+}
