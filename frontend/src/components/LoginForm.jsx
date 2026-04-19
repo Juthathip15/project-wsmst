@@ -1,46 +1,103 @@
 import { useState } from "react";
 
-export default function LoginForm({ onLogin }) {
-  const [email, setEmail] = useState("juthathip@example.com");
-  const [password, setPassword] = useState("123456");
-  const [error, setError] = useState("");
+export default function LoginForm({ onNavigate, onLoginSuccess }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setErrorMessage("");
     setLoading(true);
 
     try {
-      await onLogin(email, password);
-    } catch (err) {
-      setError(err.message || "Login failed");
+      const response = await fetch("http://localhost:8080/api/v1/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data?.message || "Login failed");
+        setLoading(false);
+        return;
+      }
+
+      onLoginSuccess({
+        token: data.token,
+        user: data.user,
+        usage: data.usage || {
+          plan: "basic",
+          quotaUsed: 0,
+          quotaLimit: 1000,
+          remaining: 1000,
+        },
+      });
+    } catch (error) {
+      setErrorMessage("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="card">
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit} className="form">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? "Loading..." : "Login"}
-        </button>
-      </form>
-      {error && <p className="error">{error}</p>}
+    <div className="auth-layout">
+      <div className="auth-canvas">
+        <div className="auth-form-wrap">
+          <h1 className="auth-heading">เข้าสู่ระบบ</h1>
+
+          {errorMessage && <p className="error">{errorMessage}</p>}
+
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <div className="auth-field">
+              <label className="auth-label">Email</label>
+              <input
+                className="auth-input"
+                type="email"
+                placeholder="กรอกอีเมล"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="auth-field">
+              <label className="auth-label">Password</label>
+              <input
+                className="auth-input"
+                type="password"
+                placeholder="กรอกรหัสผ่าน"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <button type="submit" className="auth-primary-btn" disabled={loading}>
+              {loading ? "กำลังเข้าสู่ระบบ..." : "Login"}
+            </button>
+          </form>
+
+          <div className="auth-footer-links">
+            <p className="auth-helper-text">ยังไม่ต้องการล็อกอินตอนนี้?</p>
+            <button
+              type="button"
+              className="auth-text-btn"
+              onClick={() => onNavigate("home")}
+            >
+              กลับหน้าแรก
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

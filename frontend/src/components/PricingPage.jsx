@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { subscribePlan } from "../api/api";
 
 const plans = [
   {
@@ -51,6 +52,7 @@ export default function PricingPage({
   async function handleChoosePlan(plan) {
     if (!token) {
       setError("กรุณาเข้าสู่ระบบก่อน");
+      setMessage("");
       return;
     }
 
@@ -65,20 +67,7 @@ export default function PricingPage({
     setError("");
 
     try {
-      const res = await fetch("http://127.0.0.1:8080/api/v1/subscriptions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ plan }),
-      });
-
-      if (!res.ok) {
-        throw new Error(await res.text());
-      }
-
-      const data = await res.json();
+      const data = await subscribePlan(token, plan);
 
       setMessage(data.message || `เปลี่ยนแพ็กเกจเป็น ${plan} สำเร็จ`);
       setError("");
@@ -112,14 +101,24 @@ export default function PricingPage({
           return (
             <div
               key={plan.key}
-              className={`card pricing-card ${isCurrent ? "pricing-card-active" : ""}`}
+              className={`card pricing-card ${
+                isCurrent ? "pricing-card-active" : ""
+              }`}
             >
-              <div style={{ marginBottom: "12px", fontSize: "14px", color: "#444" }}>
+              <div
+                style={{ marginBottom: "12px", fontSize: "14px", color: "#444" }}
+              >
                 {isCurrent ? "Current Plan" : ""}
               </div>
 
               <h3 style={{ marginBottom: "12px" }}>{plan.title}</h3>
-              <p style={{ fontSize: "20px", fontWeight: "700", marginBottom: "16px" }}>
+              <p
+                style={{
+                  fontSize: "20px",
+                  fontWeight: "700",
+                  marginBottom: "16px",
+                }}
+              >
                 {plan.price}
               </p>
 
@@ -141,7 +140,7 @@ export default function PricingPage({
                   ? "ใช้งานอยู่"
                   : isLoading
                   ? "กำลังบันทึก..."
-                  : "Choose Plan"}
+                  : "เลือกแพ็กเกจ"}
               </button>
             </div>
           );

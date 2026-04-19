@@ -54,7 +54,7 @@ func NewRouter(
 					QuotaMiddleware(subUsecase, usageUsecase),
 				)
 
-				r.Get("", serviceHandler.List)
+				r.Get("/", serviceHandler.List)
 				r.Get("/search", serviceHandler.Search)
 				r.Get("/{id}", serviceHandler.GetByID)
 			})

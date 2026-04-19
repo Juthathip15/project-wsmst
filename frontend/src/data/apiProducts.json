@@ -1,0 +1,56 @@
+[
+  {
+    "key": "risk-score",
+    "title": "Health Risk Score API",
+    "tag": "Insurance / Health App",
+    "description": "วิเคราะห์ความเสี่ยงสุขภาพเบื้องต้นจากข้อมูลสำคัญ เช่น อายุ BMI และค่าทางสุขภาพ",
+    "useCase": "เหมาะสำหรับบริษัทประกัน แอปสุขภาพ และระบบคัดกรองผู้ใช้งานเบื้องต้น",
+    "endpoint": "POST /api/v1/analysis/risk-score",
+    "response": "{\n  \"score\": 72,\n  \"riskLevel\": \"medium\",\n  \"recommendation\": \"ควรควบคุมน้ำหนักและตรวจสุขภาพต่อเนื่อง\"\n}"
+  },
+  {
+    "key": "cardio-risk",
+    "title": "Cardio Risk API",
+    "tag": "Hospital / Preventive Care",
+    "description": "ประเมินความเสี่ยงเบื้องต้นด้านโรคหัวใจและหลอดเลือดจากตัวชี้วัดสุขภาพ",
+    "useCase": "เหมาะสำหรับโรงพยาบาล คลินิก และระบบ preventive health monitoring",
+    "endpoint": "POST /api/v1/analysis/cardio-risk",
+    "response": "{\n  \"riskLevel\": \"low\",\n  \"score\": 34,\n  \"summary\": \"มีความเสี่ยงต่ำ แต่ควรติดตามค่าความดันและไขมัน\"\n}"
+  },
+  {
+    "key": "lab-interpretation",
+    "title": "Lab Interpretation API",
+    "tag": "Hospital / Lab",
+    "description": "สรุปผลตรวจสุขภาพเบื้องต้นให้อยู่ในรูปแบบที่อ่านง่ายและพร้อมต่อยอดในระบบ",
+    "useCase": "เหมาะสำหรับระบบแสดงผลตรวจสุขภาพ โรงพยาบาล และ dashboard สำหรับผู้ป่วย",
+    "endpoint": "POST /api/v1/analysis/lab-interpretation",
+    "response": "{\n  \"status\": \"attention\",\n  \"highlights\": [\"cholesterol สูง\", \"BMI เกินเกณฑ์\"],\n  \"recommendation\": \"ควรปรึกษาแพทย์และปรับพฤติกรรมการกิน\"\n}"
+  },
+  {
+    "key": "hospital-search",
+    "title": "Hospital / Service Search API",
+    "tag": "Provider Search",
+    "description": "ค้นหาสถานพยาบาลและบริการสุขภาพจากข้อมูลที่มีโครงสร้าง พร้อมใช้งานผ่าน API",
+    "useCase": "เหมาะสำหรับแอปสุขภาพ แพลตฟอร์มประกัน และระบบค้นหาหน่วยบริการ",
+    "endpoint": "GET /api/v1/services/search?q=clinic",
+    "response": "{\n  \"items\": [\n    {\n      \"id\": 1,\n      \"name\": \"Bangkok Health Clinic\",\n      \"type\": \"clinic\"\n    }\n  ]\n}"
+  },
+  {
+    "key": "insurance-score",
+    "title": "Insurance Scoring API",
+    "tag": "Insurance",
+    "description": "ประเมินคะแนนความเสี่ยงสำหรับ use case ด้านประกันและ underwriting เบื้องต้น",
+    "useCase": "เหมาะสำหรับบริษัทประกันที่ต้องการนำข้อมูลสุขภาพไปช่วยประเมินความเสี่ยง",
+    "endpoint": "POST /api/v1/analysis/insurance-score",
+    "response": "{\n  \"score\": 81,\n  \"tier\": \"B\",\n  \"note\": \"ควรพิจารณาข้อมูลสุขภาพเพิ่มเติมก่อนอนุมัติ\"\n}"
+  },
+  {
+    "key": "recommendation",
+    "title": "Health Recommendation API",
+    "tag": "Health App / Wellness",
+    "description": "สร้างคำแนะนำด้านสุขภาพเบื้องต้นจากข้อมูลผู้ใช้งานเพื่อใช้ในแอปหรือ dashboard",
+    "useCase": "เหมาะสำหรับ health app, wellness platform และระบบติดตามสุขภาพ",
+    "endpoint": "POST /api/v1/recommendation",
+    "response": "{\n  \"goal\": \"weight-control\",\n  \"recommendations\": [\n    \"เพิ่มการเดินวันละ 30 นาที\",\n    \"ลดอาหารหวานและมัน\",\n    \"ติดตาม BMI ทุกสัปดาห์\"\n  ]\n}"
+  }
+]
