@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       //home : PagePackage(),
       //home: PagePayment(),
       //home : page_testing_API(),
-      //home : page_Dashboard(),
+      home : page_Dashboard(),
       //home : Page_AboutUs(),
       //home: page_login(),
       //home : page_Registry(),
