@@ -34,3 +34,7 @@ type UsageRepository interface {
 	Create(log UsageLog) error
 	CountByUserID(userID int64) (int, error)
 }
+type APIProductRepository interface {
+	List() ([]APIProduct, error)
+	GetBySlug(slug string) (APIProduct, error)
+}

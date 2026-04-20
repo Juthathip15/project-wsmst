@@ -23,6 +23,7 @@ func main() {
 	serviceRepo := sqliterepo.NewServiceRepository(database)
 	usageRepo := sqliterepo.NewUsageRepository(database)
 	subscriptionRepo := sqliterepo.NewSubscriptionRepository(database)
+	apiProductRepo := sqliterepo.NewAPIProductRepository(database)
 
 	authUsecase := usecase.NewAuthUsecase(userRepo)
 	patientUsecase := usecase.NewPatientUsecase(patientRepo)
@@ -30,6 +31,7 @@ func main() {
 	serviceUsecase := usecase.NewServiceUsecase(serviceRepo)
 	subscriptionUsecase := usecase.NewSubscriptionUsecase(subscriptionRepo)
 	usageUsecase := usecase.NewUsageUsecase(usageRepo, subscriptionRepo)
+	apiProductUsecase := usecase.NewAPIProductUsecase(apiProductRepo)
 
 	authHandler := deliveryhttp.NewAuthHandler(authUsecase)
 	patientHandler := deliveryhttp.NewPatientHandler(patientUsecase)
@@ -37,6 +39,7 @@ func main() {
 	serviceHandler := deliveryhttp.NewServiceHandler(serviceUsecase)
 	usageHandler := deliveryhttp.NewUsageHandler(usageUsecase)
 	subscriptionHandler := deliveryhttp.NewSubscriptionHandler(subscriptionUsecase)
+	apiProductHandler := deliveryhttp.NewAPIProductHandler(apiProductUsecase)
 
 	router := deliveryhttp.NewRouter(
 		authHandler,
@@ -45,6 +48,7 @@ func main() {
 		serviceHandler,
 		usageHandler,
 		subscriptionHandler,
+		apiProductHandler,
 		subscriptionUsecase,
 		usageUsecase,
 	)

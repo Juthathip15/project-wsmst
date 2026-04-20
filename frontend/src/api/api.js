@@ -121,3 +121,21 @@ export async function subscribePlan(token, plan) {
 
   return res.json();
 }
+export async function getApiProductBySlug(slug) {
+  const res = await fetch(`${API_BASE}/api-products/${slug}`);
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return res.json();
+}
+export async function getApiProducts() {
+  const res = await fetch(`${API_BASE}/api-products`);
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return res.json();
+}

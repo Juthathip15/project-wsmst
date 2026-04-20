@@ -15,6 +15,7 @@ func NewRouter(
 	serviceHandler *ServiceHandler,
 	usageHandler *UsageHandler,
 	subscriptionHandler *SubscriptionHandler,
+	apiProductHandler *APIProductHandler,
 	subUsecase *usecase.SubscriptionUsecase,
 	usageUsecase *usecase.UsageUsecase,
 ) nethttp.Handler {
@@ -30,9 +31,14 @@ func NewRouter(
 	})
 
 	r.Route("/api/v1", func(r chi.Router) {
+		// public
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
 
+		r.Get("/api-products", apiProductHandler.List)
+		r.Get("/api-products/{slug}", apiProductHandler.GetBySlug)
+
+		// protected
 		r.Group(func(r chi.Router) {
 			r.Use(AuthMiddleware)
 

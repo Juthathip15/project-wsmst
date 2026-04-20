@@ -37,24 +37,13 @@ const packagePlans = [
       "Analytics + export",
     ],
   },
-  {
-    key: "enterprise",
-    title: "Enterprise",
-    price: "ติดต่อเรา",
-    description: "เหมาะสำหรับองค์กรที่ต้องการโซลูชันเฉพาะทาง",
-    features: [
-      "Custom quota",
-      "Dedicated support",
-      "Custom integration",
-      "Enterprise security",
-    ],
-  },
 ];
 
 export default function PackagePage({
   onNavigate,
   onLoginClick,
   user,
+  usage,
   onLogout,
 }) {
   return (
@@ -78,29 +67,42 @@ export default function PackagePage({
           />
 
           <div className="package-grid">
-            {packagePlans.map((plan) => (
-              <div key={plan.key} className="package-plan-card">
-                <h3 className="package-plan-title">{plan.title}</h3>
-                <p className="package-plan-price">{plan.price}</p>
-                <p className="package-plan-description">{plan.description}</p>
+            {packagePlans.map((plan) => {
+              const isCurrentPlan = usage?.plan === plan.key;
 
-                <ul className="package-plan-list">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="package-plan-item">
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  type="button"
-                  className="package-plan-btn"
-                  onClick={onLoginClick}
+              return (
+                <div
+                  key={plan.key}
+                  className={`package-plan-card ${
+                    isCurrentPlan ? "package-active" : ""
+                  }`}
                 >
-                  เริ่มใช้งาน
-                </button>
-              </div>
-            ))}
+                
+                  <h3 className="package-plan-title">{plan.title}</h3>
+                  <p className="package-plan-price">{plan.price}</p>
+                  <p className="package-plan-description">{plan.description}</p>
+
+                  <ul className="package-plan-list">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="package-plan-item">
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button
+                    type="button"
+                    className="package-plan-btn"
+                    onClick={isCurrentPlan ? undefined : onLoginClick}
+                    disabled={isCurrentPlan}
+                  >
+                    {isCurrentPlan ? "ใช้งานอยู่" : "เริ่มใช้งาน"}
+                  </button>
+
+  
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

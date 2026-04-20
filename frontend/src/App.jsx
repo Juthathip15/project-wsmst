@@ -11,7 +11,7 @@ import PlaygroundPage from "./components/PlaygroundPage";
 
 export default function App() {
   const [page, setPage] = useState("home");
-  const [selectedProductKey, setSelectedProductKey] = useState(null);
+  const [selectedProductSlug, setSelectedProductSlug] = useState("health-risk-score");
 
   const [user, setUser] = useState(null);
   const [usage, setUsage] = useState({
@@ -74,11 +74,12 @@ export default function App() {
       remaining: 1000,
     });
 
+    setSelectedProductSlug("health-risk-score");
     setPage("home");
   };
 
-  const handleOpenDocs = (productKey = null) => {
-    setSelectedProductKey(productKey);
+  const handleOpenDocs = (productSlug = "health-risk-score") => {
+    setSelectedProductSlug(productSlug);
     setPage("docs");
   };
 
@@ -117,21 +118,10 @@ export default function App() {
   if (page === "docs") {
     return (
       <DocsPage
+        slug={selectedProductSlug}
         onNavigate={setPage}
         onLoginClick={() => setPage("login")}
         onOpenDocs={handleOpenDocs}
-        selectedProductKey={selectedProductKey}
-        user={user}
-        onLogout={handleLogout}
-      />
-    );
-  }
-
-  if (page === "packages") {
-    return (
-      <PackagePage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
         user={user}
         onLogout={handleLogout}
       />
@@ -162,15 +152,27 @@ export default function App() {
   }
 
   if (page === "playground") {
-  return (
-    <PlaygroundPage
-      onNavigate={setPage}
-      onLoginClick={() => setPage("login")}
-      user={user}
-      onLogout={handleLogout}
-    />
-  );
-}
+    return (
+      <PlaygroundPage
+        onNavigate={setPage}
+        onLoginClick={() => setPage("login")}
+        user={user}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (page === "packages") {
+    return (
+      <PackagePage
+        onNavigate={setPage}
+        onLoginClick={() => setPage("login")}
+        user={user}
+        usage={usage}
+        onLogout={handleLogout}
+      />
+    );
+  }
 
   return (
     <HomePage

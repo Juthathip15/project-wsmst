@@ -1,148 +1,52 @@
+import { useEffect, useState } from "react";
 import Navbar from "./Navbar";
-import apiProducts from "../data/apiProducts.json";
-
-const docsMap = {
-  "risk-score": {
-    title: "Health Risk Score API",
-    method: "POST",
-    endpoint: "/api/v1/analysis/risk-score",
-    headers: [
-      "Authorization: Bearer YOUR_API_KEY",
-      "Content-Type: application/json",
-    ],
-    requestBody: `{
-  "age": 35,
-  "bmi": 27,
-  "cholesterol": 210,
-  "smoking": true
-}`,
-    responseBody: `{
-  "score": 72,
-  "riskLevel": "medium",
-  "recommendation": "ควรควบคุมน้ำหนักและตรวจสุขภาพต่อเนื่อง"
-}`,
-  },
-  "cardio-risk": {
-    title: "Cardio Risk API",
-    method: "POST",
-    endpoint: "/api/v1/analysis/cardio-risk",
-    headers: [
-      "Authorization: Bearer YOUR_API_KEY",
-      "Content-Type: application/json",
-    ],
-    requestBody: `{
-  "age": 48,
-  "bloodPressure": 145,
-  "cholesterol": 220,
-  "smoking": false
-}`,
-    responseBody: `{
-  "riskLevel": "low",
-  "score": 34,
-  "summary": "มีความเสี่ยงต่ำ แต่ควรติดตามค่าความดันและไขมัน"
-}`,
-  },
-  "lab-interpretation": {
-    title: "Lab Interpretation API",
-    method: "POST",
-    endpoint: "/api/v1/analysis/lab-interpretation",
-    headers: [
-      "Authorization: Bearer YOUR_API_KEY",
-      "Content-Type: application/json",
-    ],
-    requestBody: `{
-  "cholesterol": 240,
-  "bmi": 29,
-  "fastingSugar": 115
-}`,
-    responseBody: `{
-  "status": "attention",
-  "highlights": ["cholesterol สูง", "BMI เกินเกณฑ์"],
-  "recommendation": "ควรปรึกษาแพทย์และปรับพฤติกรรมการกิน"
-}`,
-  },
-  "hospital-search": {
-    title: "Hospital / Service Search API",
-    method: "GET",
-    endpoint: "/api/v1/services/search?q=clinic",
-    headers: ["Authorization: Bearer YOUR_API_KEY"],
-    requestBody: `No request body`,
-    responseBody: `{
-  "items": [
-    {
-      "id": 1,
-      "name": "Bangkok Health Clinic",
-      "type": "clinic"
-    }
-  ]
-}`,
-  },
-  "insurance-score": {
-    title: "Insurance Scoring API",
-    method: "POST",
-    endpoint: "/api/v1/analysis/insurance-score",
-    headers: [
-      "Authorization: Bearer YOUR_API_KEY",
-      "Content-Type: application/json",
-    ],
-    requestBody: `{
-  "age": 39,
-  "bmi": 31,
-  "cholesterol": 230,
-  "history": ["hypertension"]
-}`,
-    responseBody: `{
-  "score": 81,
-  "tier": "B",
-  "note": "ควรพิจารณาข้อมูลสุขภาพเพิ่มเติมก่อนอนุมัติ"
-}`,
-  },
-  recommendation: {
-    title: "Health Recommendation API",
-    method: "POST",
-    endpoint: "/api/v1/recommendation",
-    headers: [
-      "Authorization: Bearer YOUR_API_KEY",
-      "Content-Type: application/json",
-    ],
-    requestBody: `{
-  "goal": "weight-control",
-  "bmi": 28,
-  "activityLevel": "low"
-}`,
-    responseBody: `{
-  "goal": "weight-control",
-  "recommendations": [
-    "เพิ่มการเดินวันละ 30 นาที",
-    "ลดอาหารหวานและมัน",
-    "ติดตาม BMI ทุกสัปดาห์"
-  ]
-}`,
-  },
-};
+import { getApiProductBySlug } from "../api/api";
 
 export default function DocsPage({
+  slug,
+  selectedProductKey,
   onNavigate,
   onLoginClick,
-  onOpenDocs,
-  selectedProductKey,
-  user,
   onLogout,
+  user,
 }) {
-  const allDocs = Object.entries(docsMap).map(([key, value]) => ({
-    key,
-    ...value,
-  }));
+  const activeSlug = slug || selectedProductKey || "health-risk-score";
 
-  const selectedDoc = selectedProductKey ? docsMap[selectedProductKey] : null;
+  const [doc, setDoc] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const docsToRender = selectedDoc
-    ? [{ key: selectedProductKey, ...selectedDoc }]
-    : allDocs;
+  useEffect(() => {
+    async function loadDoc() {
+      setLoading(true);
+      setError("");
+      setDoc(null);
 
-  const selectedProductTitle = selectedProductKey
-    ? apiProducts.find((item) => item.key === selectedProductKey)?.title
-    : null;
+      try {
+        const res = await getApiProductBySlug(activeSlug);
+        setDoc(res.data);
+      } catch (err) {
+        setError(err.message || "Failed to load API docs");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDoc();
+  }, [activeSlug]);
+
+  function formatJSON(value) {
+    try {
+      return JSON.stringify(JSON.parse(value), null, 2);
+    } catch {
+      return value;
+    }
+  }
+
+  const methodClass =
+    doc?.method?.toUpperCase() === "POST"
+      ? "docs-method docs-method-post"
+      : "docs-method docs-method-get";
 
   return (
     <div className="docs-page">
@@ -157,69 +61,109 @@ export default function DocsPage({
       <section className="docs-section">
         <div className="docs-container">
           <div className="docs-hero">
-            <span className="docs-badge">Developer Docs</span>
-            <h1 className="docs-title">
-              {selectedProductTitle ? `${selectedProductTitle} Docs` : "API Documentation"}
-            </h1>
+            <span className="docs-badge">API Documentation</span>
+            <h1 className="docs-title">API Documentation</h1>
             <p className="docs-subtitle">
-              {selectedProductTitle
-                ? "เอกสารของ API product ที่คุณเลือก พร้อม endpoint, headers, request และ response"
-                : "เอกสารสำหรับนักพัฒนา ครอบคลุม endpoint, headers, request และ response ที่จำเป็นสำหรับการเชื่อมต่อระบบ"}
+              รายละเอียดการใช้งาน API สำหรับนักพัฒนา พร้อม endpoint,
+              request และ response ตัวอย่าง
             </p>
-
-            {selectedProductKey && (
-              <div style={{ marginTop: "16px" }}>
-                <button
-                  type="button"
-                  className="api-product-btn"
-                  onClick={() => onOpenDocs(null)}
-                >
-                  ดู Docs ทั้งหมด
-                </button>
-              </div>
-            )}
           </div>
 
-          <div className="docs-list">
-            {docsToRender.map((item) => (
-              <div key={item.key} className="docs-card">
+          {loading && (
+            <div className="docs-list">
+              <div className="docs-card">
+                <h2 className="docs-card-title">Loading...</h2>
+              </div>
+            </div>
+          )}
+
+          {!loading && error && (
+            <div className="docs-list">
+              <div className="docs-card">
+                <h2 className="docs-card-title">API Documentation</h2>
+                <p className="error">{error}</p>
+                <p className="docs-label">Requested slug</p>
+                <span className="docs-endpoint">{activeSlug}</span>
+              </div>
+            </div>
+          )}
+
+          {!loading && !error && doc && (
+            <div className="docs-list">
+              <div className="docs-card">
                 <div className="docs-card-head">
-                  <span className={`docs-method docs-method-${item.method.toLowerCase()}`}>
-                    {item.method}
-                  </span>
-                  <h3 className="docs-card-title">{item.title}</h3>
+                  <span className={methodClass}>{doc.method}</span>
+                  <h2 className="docs-card-title">{doc.name}</h2>
+                </div>
+
+                <div className="docs-block">
+                  <p className="docs-label">Description</p>
+                  <p className="docs-subtitle">{doc.description}</p>
+                </div>
+
+                <div className="docs-block">
+                  <p className="docs-label">Category</p>
+                  <p>{doc.category}</p>
                 </div>
 
                 <div className="docs-block">
                   <p className="docs-label">Endpoint</p>
-                  <code className="docs-endpoint">{item.endpoint}</code>
+                  <code className="docs-endpoint">{doc.endpoint}</code>
+                </div>
+
+                <div className="docs-block">
+                  <p className="docs-label">Target Users</p>
+                  <p>{doc.targetUsers}</p>
+                </div>
+
+                <div className="docs-block">
+                  <p className="docs-label">Available Plans</p>
+                  <p>{doc.availablePlans}</p>
+                </div>
+
+                <div className="docs-block">
+                  <p className="docs-label">Status</p>
+                  <p>{doc.status}</p>
                 </div>
 
                 <div className="docs-block">
                   <p className="docs-label">Headers</p>
                   <ul className="docs-header-list">
-                    {item.headers.map((header, index) => (
-                      <li key={index} className="docs-header-item">
-                        {header}
-                      </li>
-                    ))}
+                    <li className="docs-header-item">
+                      Content-Type: application/json
+                    </li>
+                    <li className="docs-header-item">
+                      Authorization: Bearer &lt;token&gt;
+                    </li>
                   </ul>
                 </div>
 
                 <div className="docs-grid">
                   <div className="docs-code-card">
-                    <p className="docs-label">Request</p>
-                    <pre className="docs-code">{item.requestBody}</pre>
+                    <p className="docs-label">Example Request</p>
+                    <pre className="docs-code">
+                      {formatJSON(doc.sampleRequest)}
+                    </pre>
                   </div>
 
                   <div className="docs-code-card">
-                    <p className="docs-label">Response</p>
-                    <pre className="docs-code">{item.responseBody}</pre>
+                    <p className="docs-label">Example Response</p>
+                    <pre className="docs-code">
+                      {formatJSON(doc.sampleResponse)}
+                    </pre>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {!loading && !error && !doc && (
+            <div className="docs-list">
+              <div className="docs-card">
+                <h2 className="docs-card-title">No documentation found</h2>
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </div>

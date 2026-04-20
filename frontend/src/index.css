@@ -748,9 +748,9 @@ pre {
 
 .package-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 280px);
+  justify-content: center;
   gap: 20px;
-  align-items: stretch;
 }
 
 .package-plan-card {
@@ -817,10 +817,32 @@ pre {
   font-weight: 700;
   padding: 0 18px;
   margin-top: auto;
+  align-self: center
 }
 
 .package-plan-btn:hover {
   background: var(--blue-hover);
+}
+.package-active {
+  border: 2px solid #2563eb;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.2);
+  position: relative;
+}
+
+.package-active-badge {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.package-plan-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
 }
 
 /* ===== API PRODUCTS PAGE ===== */
