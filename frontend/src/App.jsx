@@ -8,6 +8,9 @@ import ApiProductsPage from "./components/ApiProductsPage";
 import DocsPage from "./components/DocsPage";
 import DeveloperPage from "./components/DeveloperPage";
 import PlaygroundPage from "./components/PlaygroundPage";
+import AdminDashboardPage from "./components/AdminDashboardPage";
+import AdminAccountsPage from "./components/AdminAccountsPage";
+import AdminPackagesPage from "./components/AdminPackagesPage";
 
 export default function App() {
   const [page, setPage] = useState("home");
@@ -169,6 +172,39 @@ export default function App() {
         onLoginClick={() => setPage("login")}
         user={user}
         usage={usage}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (page === "admin-dashboard") {
+    return (
+      <AdminDashboardPage
+        onNavigate={setPage}
+        onLoginClick={() => setPage("login")}
+        user={user}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (page === "admin-accounts") {
+    return (
+      <AdminAccountsPage
+        onNavigate={setPage}
+        onLoginClick={() => setPage("login")}
+        user={user}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (page === "admin-packages") {
+    return (
+      <AdminPackagesPage
+        onNavigate={setPage}
+        onLoginClick={() => setPage("login")}
+        user={user}
         onLogout={handleLogout}
       />
     );

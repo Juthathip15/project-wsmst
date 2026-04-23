@@ -12,6 +12,27 @@ export default function LoginForm({ onNavigate, onLoginSuccess }) {
     setLoading(true);
 
     try {
+      if (email === "Admin@gmail.com" && password === "123456") {
+        const adminUser = {
+          email: "Admin@gmail.com",
+          name: "Admin",
+          isAdmin: true,
+        };
+        onLoginSuccess({
+          token: "admin-token-123456",
+          user: adminUser,
+          usage: {
+            plan: "admin",
+            quotaUsed: 0,
+            quotaLimit: 999999,
+            remaining: 999999,
+          },
+        });
+        setLoading(false);
+        onNavigate("admin-dashboard");
+        return;
+      }
+
       const response = await fetch("http://localhost:8080/api/v1/login", {
         method: "POST",
         headers: {
