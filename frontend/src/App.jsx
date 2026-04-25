@@ -11,6 +11,7 @@ import PlaygroundPage from "./components/PlaygroundPage";
 import AdminDashboardPage from "./components/AdminDashboardPage";
 import AdminAccountsPage from "./components/AdminAccountsPage";
 import AdminPackagesPage from "./components/AdminPackagesPage";
+import AdminApiProductsPage from "./components/AdminApiProductsPage";
 
 export default function App() {
   const [page, setPage] = useState("home");
@@ -202,6 +203,17 @@ export default function App() {
   if (page === "admin-packages") {
     return (
       <AdminPackagesPage
+        onNavigate={setPage}
+        onLoginClick={() => setPage("login")}
+        user={user}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (page === "admin-api-products") {
+    return (
+      <AdminApiProductsPage
         onNavigate={setPage}
         onLoginClick={() => setPage("login")}
         user={user}

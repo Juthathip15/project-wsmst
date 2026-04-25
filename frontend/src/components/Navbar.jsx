@@ -7,7 +7,7 @@ export default function Navbar({
   isAdmin = false,
 }) {
   const handleNavigate = (page) => {
-    const adminPages = ["admin-dashboard", "admin-accounts", "admin-packages"];
+    const adminPages = ["admin-dashboard", "admin-accounts", "admin-packages", "admin-api-products"];
     if (adminPages.includes(page) && !isAdmin) {
       onNavigate(page);
     } else if (!adminPages.includes(page) && isAdmin) {
@@ -46,6 +46,14 @@ export default function Navbar({
               onClick={() => onNavigate("admin-packages")}
             >
               จัดการแพ็กเกจ
+            </button>
+
+            <button
+              type="button"
+              className={`home-nav-link ${activePage === "admin-api-products" ? "active" : ""}`}
+              onClick={() => onNavigate("admin-api-products")}
+            >
+              จัดการ API Products
             </button>
           </nav>
         </div>
@@ -153,7 +161,7 @@ export default function Navbar({
               {user.isAdmin && (
                 <button
                   type="button"
-                  className={`home-nav-link ${["admin-dashboard", "admin-accounts", "admin-packages"].includes(activePage) ? "active" : ""}`}
+                  className={`home-nav-link ${["admin-dashboard", "admin-accounts", "admin-packages", "admin-api-products"].includes(activePage) ? "active" : ""}`}
                   onClick={() => onNavigate("admin-dashboard")}
                 >
                   Admin
