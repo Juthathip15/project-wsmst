@@ -1,21 +1,18 @@
 import { useEffect, useState } from "react";
 import HomePage from "./components/HomePage";
 import LoginForm from "./components/LoginForm";
-import AboutPage from "./components/AboutPage";
 import PackagePage from "./components/PackagePage";
 import DashboardPage from "./components/DashboardPage";
 import ApiProductsPage from "./components/ApiProductsPage";
 import DocsPage from "./components/DocsPage";
 import DeveloperPage from "./components/DeveloperPage";
 import PlaygroundPage from "./components/PlaygroundPage";
-import AdminDashboardPage from "./components/AdminDashboardPage";
-import AdminAccountsPage from "./components/AdminAccountsPage";
-import AdminPackagesPage from "./components/AdminPackagesPage";
-import AdminApiProductsPage from "./components/AdminApiProductsPage";
+import RegisterForm from "./components/RegisterForm";
+import ResetPasswordPage from "./components/ResetPasswordPage";
 
 export default function App() {
   const [page, setPage] = useState("home");
-  const [selectedProductSlug, setSelectedProductSlug] = useState("health-risk-score");
+  const [selectedProductKey, setSelectedProductKey] = useState(null);
 
   const [user, setUser] = useState(null);
   const [usage, setUsage] = useState({
@@ -78,12 +75,11 @@ export default function App() {
       remaining: 1000,
     });
 
-    setSelectedProductSlug("health-risk-score");
     setPage("home");
   };
 
-  const handleOpenDocs = (productSlug = "health-risk-score") => {
-    setSelectedProductSlug(productSlug);
+  const handleOpenDocs = (productKey = null) => {
+    setSelectedProductKey(productKey);
     setPage("docs");
   };
 
@@ -94,6 +90,13 @@ export default function App() {
         onLoginSuccess={handleLoginSuccess}
       />
     );
+  }
+
+  if (page === "reset-password") {
+    return (
+    <ResetPasswordPage 
+    onNavigate={setPage} />
+  );
   }
 
   if (page === "about") {
@@ -122,10 +125,21 @@ export default function App() {
   if (page === "docs") {
     return (
       <DocsPage
-        slug={selectedProductSlug}
         onNavigate={setPage}
         onLoginClick={() => setPage("login")}
         onOpenDocs={handleOpenDocs}
+        selectedProductKey={selectedProductKey}
+        user={user}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (page === "packages") {
+    return (
+      <PackagePage
+        onNavigate={setPage}
+        onLoginClick={() => setPage("login")}
         user={user}
         onLogout={handleLogout}
       />
@@ -156,71 +170,18 @@ export default function App() {
   }
 
   if (page === "playground") {
-    return (
-      <PlaygroundPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        onLogout={handleLogout}
-      />
-    );
-  }
-
-  if (page === "packages") {
-    return (
-      <PackagePage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        usage={usage}
-        onLogout={handleLogout}
-      />
-    );
-  }
-
-  if (page === "admin-dashboard") {
-    return (
-      <AdminDashboardPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        onLogout={handleLogout}
-      />
-    );
-  }
-
-  if (page === "admin-accounts") {
-    return (
-      <AdminAccountsPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        onLogout={handleLogout}
-      />
-    );
-  }
-
-  if (page === "admin-packages") {
-    return (
-      <AdminPackagesPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        onLogout={handleLogout}
-      />
-    );
-  }
-
-  if (page === "admin-api-products") {
-    return (
-      <AdminApiProductsPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        onLogout={handleLogout}
-      />
-    );
-  }
+  return (
+    <PlaygroundPage
+      onNavigate={setPage}
+      onLoginClick={() => setPage("login")}
+      user={user}
+      onLogout={handleLogout}
+    />
+  );
+}
+  if (page === "register") {
+  return <RegisterForm onNavigate={setPage} />;
+}
 
   return (
     <HomePage

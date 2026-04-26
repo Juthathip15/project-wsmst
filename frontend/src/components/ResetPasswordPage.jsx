@@ -1,8 +1,9 @@
 import { useState } from "react";
 
-export default function LoginForm({ onNavigate, onLoginSuccess }) {
+export default function ResetPasswordPage({ onNavigate }) {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -11,30 +12,30 @@ export default function LoginForm({ onNavigate, onLoginSuccess }) {
     setErrorMessage("");
     setLoading(true);
 
-    try {
-      // Fake login logic for admin
-      if (email === "admin@example.com" && password === "admin123") {
-        onLoginSuccess({ token: "admin-token", user: { name: "Admin" } });
-        onNavigate("admin-dashboard");
-        return;
-      }
+    // ตรวจสอบอีเมลและรหัสผ่าน
+    if (newPassword !== confirmPassword) {
+      setErrorMessage("รหัสผ่านไม่ตรงกัน");
+      setLoading(false);
+      return;
+    }
 
-      const response = await fetch("http://localhost:8080/api/v1/login", {
+    try {
+      const response = await fetch("http://localhost:8080/api/v1/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, newPassword }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setErrorMessage(data?.message || "Login failed");
+        setErrorMessage(data?.message || "รีเซ็ตรหัสผ่านล้มเหลว");
         setLoading(false);
         return;
       }
 
-      onLoginSuccess({ token: data.token, user: data.user });
-      onNavigate("home");
+      alert("รีเซ็ตรหัสผ่านสำเร็จ");
+      onNavigate("login");
     } catch (error) {
       setErrorMessage("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     } finally {
@@ -46,7 +47,7 @@ export default function LoginForm({ onNavigate, onLoginSuccess }) {
     <div className="auth-layout">
       <div className="auth-canvas">
         <div className="auth-form-wrap">
-          <h1 className="auth-heading">เข้าสู่ระบบ</h1>
+          <h1 className="auth-heading">รีเซ็ตรหัสผ่านใหม่</h1>
 
           {errorMessage && <p className="error">{errorMessage}</p>}
 
@@ -64,41 +65,42 @@ export default function LoginForm({ onNavigate, onLoginSuccess }) {
             </div>
 
             <div className="auth-field">
-              <label className="auth-label">รหัสผ่าน</label>
+              <label className="auth-label">รหัสผ่านใหม่</label>
               <input
                 className="auth-input"
                 type="password"
-                placeholder="กรอกรหัสผ่าน"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="กรอกรหัสผ่านใหม่"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="auth-field">
+              <label className="auth-label">ยืนยันรหัสผ่านใหม่</label>
+              <input
+                className="auth-input"
+                type="password"
+                placeholder="กรอกรหัสผ่านอีกครั้ง"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
             </div>
 
             <button type="submit" className="auth-primary-btn" disabled={loading}>
-              {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
+              {loading ? "กำลังรีเซ็ตรหัสผ่าน..." : "รีเซ็ตรหัสผ่าน"}
             </button>
           </form>
 
           <div className="auth-footer-links">
-            <p className="auth-helper-text">ยังไม่เป็นสมาชิก?</p>
             <button
               type="button"
               className="auth-text-btn"
-              onClick={() => onNavigate("register")}
+              onClick={() => onNavigate("login")}
             >
-              ลงทะเบียน
+              กลับไปที่หน้าล็อกอิน
             </button>
-
-            <p className="auth-helper-text">ลืมรหัสผ่าน?</p>
-            <button
-              type="button"
-              className="auth-text-btn"
-              onClick={() => onNavigate("reset-password")}
-            >
-              รีเซ็ตรหัสผ่าน
-            </button>
-            
           </div>
         </div>
       </div>

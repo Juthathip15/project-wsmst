@@ -60,12 +60,6 @@ export default function PackagePage({
         <div className="package-container">
           <h2 className="package-title">แพ็คเกจ</h2>
 
-          <input
-            className="package-filter"
-            type="text"
-            placeholder="ค้นหาแพ็คเกจ..."
-          />
-
           <div className="package-grid">
             {packagePlans.map((plan) => {
               const isCurrentPlan = usage?.plan === plan.key;
