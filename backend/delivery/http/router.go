@@ -16,6 +16,7 @@ func NewRouter(
 	usageHandler *UsageHandler,
 	subscriptionHandler *SubscriptionHandler,
 	apiProductHandler *APIProductHandler,
+	adminHandler *AdminHandler,
 	subUsecase *usecase.SubscriptionUsecase,
 	usageUsecase *usecase.UsageUsecase,
 ) nethttp.Handler {
@@ -24,6 +25,7 @@ func NewRouter(
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.StripSlashes)
+	r.Use(CORSMiddleware)
 
 	r.Get("/health", func(w nethttp.ResponseWriter, r *nethttp.Request) {
 		w.WriteHeader(nethttp.StatusOK)
@@ -31,14 +33,14 @@ func NewRouter(
 	})
 
 	r.Route("/api/v1", func(r chi.Router) {
-		// public
+		// public routes
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
 
 		r.Get("/api-products", apiProductHandler.List)
 		r.Get("/api-products/{slug}", apiProductHandler.GetBySlug)
 
-		// protected
+		// protected routes
 		r.Group(func(r chi.Router) {
 			r.Use(AuthMiddleware)
 
@@ -63,6 +65,14 @@ func NewRouter(
 				r.Get("/", serviceHandler.List)
 				r.Get("/search", serviceHandler.Search)
 				r.Get("/{id}", serviceHandler.GetByID)
+			})
+
+			// admin only routes
+			r.Group(func(r chi.Router) {
+				r.Use(AdminOnly)
+				r.Get("/admin/users", adminHandler.GetUsers)
+				r.Put("/admin/users/{id}", adminHandler.UpdateUser)
+				r.Delete("/admin/users/{id}", adminHandler.DeleteUser)
 			})
 		})
 	})

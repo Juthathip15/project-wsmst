@@ -9,10 +9,16 @@ import DeveloperPage from "./components/DeveloperPage";
 import PlaygroundPage from "./components/PlaygroundPage";
 import RegisterForm from "./components/RegisterForm";
 import ResetPasswordPage from "./components/ResetPasswordPage";
+import AdminDashboardPage from "./components/AdminDashboardPage";
+import AdminAccountsPage from "./components/AdminAccountsPage";
+import AdminPackagesPage from "./components/AdminPackagesPage";
+import AdminApiProductsPage from "./components/AdminApiProductsPage";
+import CheckoutPage from "./components/CheckoutPage";
 
 export default function App() {
   const [page, setPage] = useState("home");
   const [selectedProductKey, setSelectedProductKey] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
   const [user, setUser] = useState(null);
   const [usage, setUsage] = useState({
@@ -58,8 +64,6 @@ export default function App() {
 
     localStorage.setItem("usage", JSON.stringify(loginUsage));
     setUsage(loginUsage);
-
-    setPage("home");
   };
 
   const handleLogout = () => {
@@ -68,6 +72,7 @@ export default function App() {
     localStorage.removeItem("usage");
 
     setUser(null);
+    setSelectedPlan(null);
     setUsage({
       plan: "basic",
       quotaUsed: 0,
@@ -83,6 +88,11 @@ export default function App() {
     setPage("docs");
   };
 
+  const handleCheckout = (plan) => {
+    setSelectedPlan(plan);
+    setPage("checkout");
+  };
+
   if (page === "login") {
     return (
       <LoginForm
@@ -93,15 +103,49 @@ export default function App() {
   }
 
   if (page === "reset-password") {
-    return (
-    <ResetPasswordPage 
-    onNavigate={setPage} />
-  );
+    return <ResetPasswordPage onNavigate={setPage} />;
   }
 
-  if (page === "about") {
+  if (page === "register") {
+    return <RegisterForm onNavigate={setPage} />;
+  }
+
+  if (page === "admin-dashboard") {
     return (
-      <AboutPage
+      <AdminDashboardPage
+        onNavigate={setPage}
+        onLoginClick={() => setPage("login")}
+        user={user}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (page === "admin-accounts") {
+    return (
+      <AdminAccountsPage
+        onNavigate={setPage}
+        onLoginClick={() => setPage("login")}
+        user={user}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (page === "admin-packages") {
+    return (
+      <AdminPackagesPage
+        onNavigate={setPage}
+        onLoginClick={() => setPage("login")}
+        user={user}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (page === "admin-api-products") {
+    return (
+      <AdminApiProductsPage
         onNavigate={setPage}
         onLoginClick={() => setPage("login")}
         user={user}
@@ -141,7 +185,21 @@ export default function App() {
         onNavigate={setPage}
         onLoginClick={() => setPage("login")}
         user={user}
+        usage={usage}
         onLogout={handleLogout}
+        onCheckout={handleCheckout}
+      />
+    );
+  }
+
+  if (page === "checkout") {
+    return (
+      <CheckoutPage
+        onNavigate={setPage}
+        onLoginClick={() => setPage("login")}
+        user={user}
+        onLogout={handleLogout}
+        selectedPlan={selectedPlan}
       />
     );
   }
@@ -170,18 +228,15 @@ export default function App() {
   }
 
   if (page === "playground") {
-  return (
-    <PlaygroundPage
-      onNavigate={setPage}
-      onLoginClick={() => setPage("login")}
-      user={user}
-      onLogout={handleLogout}
-    />
-  );
-}
-  if (page === "register") {
-  return <RegisterForm onNavigate={setPage} />;
-}
+    return (
+      <PlaygroundPage
+        onNavigate={setPage}
+        onLoginClick={() => setPage("login")}
+        user={user}
+        onLogout={handleLogout}
+      />
+    );
+  }
 
   return (
     <HomePage

@@ -4,7 +4,9 @@ type UserRepository interface {
 	Create(user User) (User, error)
 	GetByEmail(email string) (User, error)
 	GetByID(id int64) (User, error)
+	GetAll() ([]User, error)
 }
+
 type PatientRepository interface {
 	Create(patient Patient) (Patient, error)
 	GetByID(id int64) (Patient, error)
@@ -22,19 +24,32 @@ type ServiceRepository interface {
 	Search(q, category string, minPrice, maxPrice float64, sort string, page, limit int) ([]Service, error)
 	Create(service Service) (Service, error)
 }
+
 type CategoryRepository interface {
 	GetAll() ([]Category, error)
 }
+
 type SubscriptionRepository interface {
 	Create(sub Subscription) (Subscription, error)
 	GetByUserID(userID int64) (Subscription, error)
 	Update(sub Subscription) error
 }
+
 type UsageRepository interface {
 	Create(log UsageLog) error
 	CountByUserID(userID int64) (int, error)
 }
+
 type APIProductRepository interface {
 	List() ([]APIProduct, error)
 	GetBySlug(slug string) (APIProduct, error)
+}
+
+type UserRepository interface {
+	Create(user User) (User, error)
+	GetByEmail(email string) (User, error)
+	GetByID(id int64) (User, error)
+	GetAll() ([]User, error)
+	UpdateRoleAndPlan(id int64, role string, plan string) error
+	Delete(id int64) error
 }

@@ -168,3 +168,27 @@ func RateLimitMiddleware(
 		})
 	}
 }
+func AdminOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		parts := strings.Split(authHeader, " ")
+
+		if len(parts) != 2 {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		claims, err := internalauth.ParseToken(parts[1])
+		if err != nil {
+			http.Error(w, "invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		if claims.Role != "admin" {
+			http.Error(w, "forbidden", http.StatusForbidden)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}

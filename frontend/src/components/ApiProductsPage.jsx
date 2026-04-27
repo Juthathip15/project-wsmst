@@ -140,14 +140,27 @@ export default function ApiProductsPage({
                   </div>
 
                   <div className="api-product-actions">
-                    <button
-                      type="button"
-                      className="api-product-btn"
-                      onClick={() => onOpenDocs(api.slug)}
-                    >
-                      ดู Docs
-                    </button>
-                  </div>
+  <button
+    className="api-product-btn"
+    onClick={() => onOpenDocs(api.slug)}
+  >
+    ดู Docs
+  </button>
+
+  <button
+    className="api-product-btn"
+    onClick={() => onNavigate("playground")}
+  >
+    Try API
+  </button>
+
+  <button
+    className="api-product-btn"
+    onClick={() => onNavigate("packages")}
+  >
+    Upgrade Plan
+  </button>
+</div>
                 </div>
               ))}
             </div>

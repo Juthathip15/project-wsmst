@@ -12,29 +12,30 @@ export default function LoginForm({ onNavigate, onLoginSuccess }) {
     setLoading(true);
 
     try {
-      // Fake login logic for admin
-      if (email === "admin@example.com" && password === "admin123") {
-        onLoginSuccess({ token: "admin-token", user: { name: "Admin" } });
-        onNavigate("admin-dashboard");
-        return;
-      }
-
       const response = await fetch("http://localhost:8080/api/v1/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
 
       if (!response.ok) {
-        setErrorMessage(data?.message || "Login failed");
-        setLoading(false);
+        setErrorMessage(data?.message || text || "Login failed");
         return;
       }
 
-      onLoginSuccess({ token: data.token, user: data.user });
-      onNavigate("home");
+      onLoginSuccess({
+        token: data.token,
+        user: data.user,
+      });
+
+      if (data.user?.role === "admin") {
+        onNavigate("admin-dashboard");
+      } else {
+        onNavigate("dashboard");
+      }
     } catch (error) {
       setErrorMessage("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     } finally {
@@ -98,7 +99,6 @@ export default function LoginForm({ onNavigate, onLoginSuccess }) {
             >
               รีเซ็ตรหัสผ่าน
             </button>
-            
           </div>
         </div>
       </div>

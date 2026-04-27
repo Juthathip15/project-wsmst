@@ -41,6 +41,9 @@ func main() {
 	subscriptionHandler := deliveryhttp.NewSubscriptionHandler(subscriptionUsecase)
 	apiProductHandler := deliveryhttp.NewAPIProductHandler(apiProductUsecase)
 
+	// เพิ่มอันนี้
+	adminHandler := deliveryhttp.NewAdminHandler(userRepo)
+
 	router := deliveryhttp.NewRouter(
 		authHandler,
 		patientHandler,
@@ -49,14 +52,13 @@ func main() {
 		usageHandler,
 		subscriptionHandler,
 		apiProductHandler,
+		adminHandler, // เพิ่มอันนี้
 		subscriptionUsecase,
 		usageUsecase,
 	)
 
-	handler := deliveryhttp.CORSMiddleware(router)
-
 	log.Println("server started at :8080")
-	if err := nethttp.ListenAndServe(":8080", handler); err != nil {
+	if err := nethttp.ListenAndServe(":8080", router); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
 }
