@@ -24,6 +24,7 @@ const packagePlans = [
     description: "เหมาะสำหรับ partner ที่ต้องการใช้งานจริงระดับกลาง",
     quota: "50,000 requests/เดือน",
     rate: "100 req/นาที",
+    recommended: true,
     features: [
       "50,000 requests/เดือน",
       "Rate limit: 100 req/นาที",
@@ -56,6 +57,8 @@ export default function PackagePage({
   onLogout,
   onCheckout,
 }) {
+  const currentPlan = user?.plan || usage?.plan || "basic";
+
   const handleSelectPlan = (plan) => {
     if (!user) {
       onLoginClick();
@@ -79,11 +82,17 @@ export default function PackagePage({
 
       <section className="package-section">
         <div className="package-container">
-          <h2 className="package-title">แพ็คเกจ</h2>
+          <div className="package-header">
+            <span className="package-badge">Pricing Plans</span>
+            <h2 className="package-title">แพ็คเกจ</h2>
+            <p className="package-subtitle">
+              เลือกแพ็คเกจที่เหมาะกับการใช้งาน API ของคุณ
+            </p>
+          </div>
 
           <div className="package-grid">
             {packagePlans.map((plan) => {
-              const isCurrentPlan = usage?.plan === plan.key;
+              const isCurrentPlan = currentPlan === plan.key;
 
               return (
                 <div
@@ -92,10 +101,36 @@ export default function PackagePage({
                     isCurrentPlan ? "package-active" : ""
                   }`}
                 >
+                  <div className="package-card-top">
+                    {plan.recommended && currentPlan === "basic" && (
+                      <span className="package-recommended-badge">
+                        Recommended
+                      </span>
+                    )}
 
-                  <h3 className="package-plan-title">{plan.title}</h3>
-                  <p className="package-plan-price">{plan.price}</p>
-                  <p className="package-plan-description">{plan.description}</p>
+                    {isCurrentPlan && (
+                      <span className="package-active-badge">
+                        แพ็คเกจปัจจุบัน
+                      </span>
+                    )}
+
+                    <h3 className="package-plan-title">{plan.title}</h3>
+                    <p className="package-plan-price">{plan.price}</p>
+                    <p className="package-plan-description">
+                      {plan.description}
+                    </p>
+                  </div>
+
+                  <div className="package-plan-meta">
+                    <div>
+                      <span>Quota</span>
+                      <strong>{plan.quota}</strong>
+                    </div>
+                    <div>
+                      <span>Rate Limit</span>
+                      <strong>{plan.rate}</strong>
+                    </div>
+                  </div>
 
                   <ul className="package-plan-list">
                     {plan.features.map((feature, index) => (

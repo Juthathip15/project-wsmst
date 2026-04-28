@@ -15,6 +15,7 @@ export default function DocsPage({
   const [doc, setDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState("");
 
   useEffect(() => {
     async function loadDoc() {
@@ -42,6 +43,16 @@ export default function DocsPage({
       return value;
     }
   }
+
+  const copyText = async (label, value) => {
+    try {
+      await navigator.clipboard.writeText(value || "");
+      setCopied(label);
+      setTimeout(() => setCopied(""), 1600);
+    } catch {
+      alert("คัดลอกไม่สำเร็จ");
+    }
+  };
 
   const methodClass =
     doc?.method?.toUpperCase() === "POST"
@@ -94,6 +105,24 @@ export default function DocsPage({
                 <div className="docs-card-head">
                   <span className={methodClass}>{doc.method}</span>
                   <h2 className="docs-card-title">{doc.name}</h2>
+
+                  <div className="docs-actions">
+                    <button
+                      type="button"
+                      className="docs-copy-btn"
+                      onClick={() => copyText("endpoint", doc.endpoint)}
+                    >
+                      {copied === "endpoint" ? "Copied" : "Copy Endpoint"}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="docs-try-btn"
+                      onClick={() => onNavigate("playground")}
+                    >
+                      Try in Playground
+                    </button>
+                  </div>
                 </div>
 
                 <div className="docs-block">
@@ -140,14 +169,38 @@ export default function DocsPage({
 
                 <div className="docs-grid">
                   <div className="docs-code-card">
-                    <p className="docs-label">Example Request</p>
+                    <div className="docs-code-head">
+                      <p className="docs-label">Example Request</p>
+                      <button
+                        type="button"
+                        className="docs-copy-btn"
+                        onClick={() =>
+                          copyText("request", formatJSON(doc.sampleRequest))
+                        }
+                      >
+                        {copied === "request" ? "Copied" : "Copy"}
+                      </button>
+                    </div>
+
                     <pre className="docs-code">
                       {formatJSON(doc.sampleRequest)}
                     </pre>
                   </div>
 
                   <div className="docs-code-card">
-                    <p className="docs-label">Example Response</p>
+                    <div className="docs-code-head">
+                      <p className="docs-label">Example Response</p>
+                      <button
+                        type="button"
+                        className="docs-copy-btn"
+                        onClick={() =>
+                          copyText("response", formatJSON(doc.sampleResponse))
+                        }
+                      >
+                        {copied === "response" ? "Copied" : "Copy"}
+                      </button>
+                    </div>
+
                     <pre className="docs-code">
                       {formatJSON(doc.sampleResponse)}
                     </pre>

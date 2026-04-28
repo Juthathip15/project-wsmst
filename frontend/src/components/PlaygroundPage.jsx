@@ -59,11 +59,14 @@ export default function PlaygroundPage({
     setLoading(true);
     setStatusText("Running...");
 
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
     try {
       let parsedBody = {};
+
       try {
         parsedBody = requestBody ? JSON.parse(requestBody) : {};
-      } catch (error) {
+      } catch {
         setResponseText(`{
   "error": "invalid_json",
   "message": "Request body is not valid JSON"
@@ -92,6 +95,7 @@ export default function PlaygroundPage({
         else if (score >= 50) riskLevel = "medium";
 
         mockResponse = {
+          status: "success",
           score,
           riskLevel,
           recommendation:
@@ -107,6 +111,7 @@ export default function PlaygroundPage({
         const q = parsedBody.q || "clinic";
 
         mockResponse = {
+          status: "success",
           query: q,
           items: [
             {
@@ -127,7 +132,7 @@ export default function PlaygroundPage({
 
       setResponseText(JSON.stringify(mockResponse, null, 2));
       setStatusText("200 OK");
-    } catch (error) {
+    } catch {
       setResponseText(`{
   "error": "internal_error",
   "message": "Something went wrong"
@@ -137,6 +142,12 @@ export default function PlaygroundPage({
       setLoading(false);
     }
   };
+
+  const statusClass = statusText.includes("400") || statusText.includes("500")
+    ? "playground-status error"
+    : statusText.includes("200")
+    ? "playground-status success"
+    : "playground-status";
 
   return (
     <div className="playground-page">
@@ -231,7 +242,7 @@ export default function PlaygroundPage({
                   </p>
                 </div>
 
-                <span className="playground-status">{statusText}</span>
+                <span className={statusClass}>{statusText}</span>
               </div>
 
               <pre className="playground-response">{responseText}</pre>

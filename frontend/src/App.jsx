@@ -14,11 +14,13 @@ import AdminAccountsPage from "./components/AdminAccountsPage";
 import AdminPackagesPage from "./components/AdminPackagesPage";
 import AdminApiProductsPage from "./components/AdminApiProductsPage";
 import CheckoutPage from "./components/CheckoutPage";
+import PaymentStatusPage from "./components/PaymentStatusPage";
 
 export default function App() {
   const [page, setPage] = useState("home");
   const [selectedProductKey, setSelectedProductKey] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [paymentPlan, setPaymentPlan] = useState(null);
 
   const [user, setUser] = useState(null);
   const [usage, setUsage] = useState({
@@ -45,12 +47,23 @@ export default function App() {
   const handleLoginSuccess = (loginData) => {
     const token = loginData?.token || "";
     const loginUser = loginData?.user || null;
+
     const loginUsage =
       loginData?.usage || {
-        plan: "basic",
+        plan: loginData?.user?.plan || "basic",
         quotaUsed: 0,
-        quotaLimit: 1000,
-        remaining: 1000,
+        quotaLimit:
+          loginData?.user?.plan === "gold"
+            ? 999999999
+            : loginData?.user?.plan === "silver"
+            ? 50000
+            : 1000,
+        remaining:
+          loginData?.user?.plan === "gold"
+            ? 999999999
+            : loginData?.user?.plan === "silver"
+            ? 50000
+            : 1000,
       };
 
     if (token) {
@@ -73,6 +86,8 @@ export default function App() {
 
     setUser(null);
     setSelectedPlan(null);
+    setPaymentPlan(null);
+
     setUsage({
       plan: "basic",
       quotaUsed: 0,
@@ -92,6 +107,32 @@ export default function App() {
     setSelectedPlan(plan);
     setPage("checkout");
   };
+
+  const handlePaymentSuccess = (plan) => {
+  setPaymentPlan(plan);
+
+  const updatedUser = {
+    ...user,
+    plan: plan.key,
+  };
+
+  setUser(updatedUser);
+  localStorage.setItem("user", JSON.stringify(updatedUser));
+
+  const updatedUsage = {
+    plan: plan.key,
+    quotaUsed: 0,
+    quotaLimit:
+      plan.key === "basic" ? 1000 :
+      plan.key === "silver" ? 50000 : 999999999,
+    remaining:
+      plan.key === "basic" ? 1000 :
+      plan.key === "silver" ? 50000 : 999999999,
+  };
+
+  setUsage(updatedUsage);
+  localStorage.setItem("usage", JSON.stringify(updatedUsage));
+};
 
   if (page === "login") {
     return (
@@ -193,16 +234,29 @@ export default function App() {
   }
 
   if (page === "checkout") {
-    return (
-      <CheckoutPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        onLogout={handleLogout}
-        selectedPlan={selectedPlan}
-      />
-    );
-  }
+  return (
+    <CheckoutPage
+      onNavigate={setPage}
+      onLoginClick={() => setPage("login")}
+      user={user}
+      onLogout={handleLogout}
+      selectedPlan={selectedPlan}
+      onPaymentSuccess={handlePaymentSuccess}
+    />
+  );
+}
+
+ if (page === "payment-status") {
+  return (
+    <PaymentStatusPage
+      onNavigate={setPage}
+      onLoginClick={() => setPage("login")}
+      user={user}
+      onLogout={handleLogout}
+      paymentPlan={paymentPlan}
+    />
+  );
+}
 
   if (page === "developer") {
     return (

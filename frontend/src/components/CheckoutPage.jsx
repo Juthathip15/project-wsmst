@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Navbar from "./Navbar";
 
 export default function CheckoutPage({
@@ -6,7 +7,11 @@ export default function CheckoutPage({
   user,
   onLogout,
   selectedPlan,
+  onPaymentSuccess,
 }) {
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   if (!selectedPlan) {
     return (
       <div className="checkout-page">
@@ -39,11 +44,40 @@ export default function CheckoutPage({
     );
   }
 
-  const handleConfirm = () => {
-    alert("จำลองการชำระเงินสำเร็จ ✅");
-    onNavigate("dashboard");
-  };
+  const handleConfirm = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
+    const response = await fetch("http://localhost:8080/api/v1/subscriptions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        plan: selectedPlan.key,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data?.message || "ชำระเงินไม่สำเร็จ");
+      return;
+    }
+
+    // 👉 เรียก App
+    if (onPaymentSuccess) {
+      onPaymentSuccess(selectedPlan);
+    }
+
+    // 👉 ไปหน้า success
+    onNavigate("payment-status");
+
+  } catch {
+    alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ ❌");
+  }
+};
   return (
     <div className="checkout-page">
       <Navbar
@@ -64,13 +98,13 @@ export default function CheckoutPage({
             </p>
           </div>
 
+          {errorMessage && <p className="error">{errorMessage}</p>}
+
           <div className="checkout-grid">
             <div className="checkout-card">
               <h2 className="checkout-card-title">{selectedPlan.title}</h2>
               <p className="checkout-price">{selectedPlan.price}</p>
-              <p className="checkout-description">
-                {selectedPlan.description}
-              </p>
+              <p className="checkout-description">{selectedPlan.description}</p>
 
               <div className="checkout-detail-list">
                 <div className="checkout-detail-item">
@@ -81,6 +115,11 @@ export default function CheckoutPage({
                 <div className="checkout-detail-item">
                   <span>Rate Limit</span>
                   <strong>{selectedPlan.rate}</strong>
+                </div>
+
+                <div className="checkout-detail-item">
+                  <span>Account</span>
+                  <strong>{user?.email || "-"}</strong>
                 </div>
               </div>
             </div>
@@ -102,17 +141,23 @@ export default function CheckoutPage({
                 type="button"
                 className="checkout-primary-btn"
                 onClick={handleConfirm}
+                disabled={loading}
               >
-                ยืนยันการชำระเงิน
+                {loading ? "กำลังยืนยัน..." : "ยืนยันการชำระเงินจำลอง"}
               </button>
 
               <button
                 type="button"
                 className="checkout-secondary-btn"
                 onClick={() => onNavigate("packages")}
+                disabled={loading}
               >
                 กลับไปเลือกแพ็คเกจ
               </button>
+
+              <p className="checkout-note">
+                Demo นี้ไม่ตัดเงินจริง แต่จะอัปเดตแพ็คเกจในระบบจริง
+              </p>
             </div>
           </div>
         </div>

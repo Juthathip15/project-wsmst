@@ -29,7 +29,7 @@ func main() {
 	patientUsecase := usecase.NewPatientUsecase(patientRepo)
 	recordUsecase := usecase.NewHealthRecordUsecase(recordRepo, patientRepo)
 	serviceUsecase := usecase.NewServiceUsecase(serviceRepo)
-	subscriptionUsecase := usecase.NewSubscriptionUsecase(subscriptionRepo)
+	subscriptionUsecase := usecase.NewSubscriptionUsecase(subscriptionRepo, userRepo)	
 	usageUsecase := usecase.NewUsageUsecase(usageRepo, subscriptionRepo)
 	apiProductUsecase := usecase.NewAPIProductUsecase(apiProductRepo)
 

@@ -1,7 +1,6 @@
-import { useMemo } from "react";
 import Navbar from "./Navbar";
 
-export default function HomePage({ onNavigate, user, onLogout }) {
+export default function HomePage({ onNavigate, onLoginClick, user, onLogout }) {
   const highlights = [
     {
       title: "Reliable Data",
@@ -25,8 +24,10 @@ export default function HomePage({ onNavigate, user, onLogout }) {
     <div className="home-page">
       <Navbar
         onNavigate={onNavigate}
+        onLoginClick={onLoginClick}
         user={user}
         onLogout={onLogout}
+        activePage="home"
       />
 
       <section className="about-section">
@@ -34,26 +35,48 @@ export default function HomePage({ onNavigate, user, onLogout }) {
           <div className="about-hero">
             <div className="about-hero-left">
               <span className="about-badge">About Our Platform</span>
+
               <h1 className="about-title">
                 แพลตฟอร์มข้อมูลสุขภาพ
                 <br />
                 สำหรับองค์กรและนักพัฒนา
               </h1>
+
               <p className="about-highlight">
                 เราคือผู้ให้บริการ Web Service และ API ด้านข้อมูลสุขภาพและข้อมูลสถานพยาบาล
                 สำหรับองค์กรที่ต้องการนำข้อมูลไปพัฒนาบริการ ระบบวิเคราะห์
                 และธุรกิจสุขภาพอย่างมีประสิทธิภาพ
               </p>
+
               <p className="about-text">
                 เรามุ่งเน้นการให้บริการข้อมูลในรูปแบบที่พร้อมใช้งาน ทั้งข้อมูลเชิงสถิติ
                 ข้อมูลสรุป และข้อมูลที่เหมาะกับการพัฒนาระบบวิเคราะห์ขั้นสูง
                 ในอุตสาหกรรมสุขภาพ
               </p>
+
               <p className="about-text">
                 รองรับการใช้งานของหลายภาคส่วน เช่น โรงพยาบาล คลินิก
                 บริษัทประกันสุขภาพ และธุรกิจ HealthTech
                 ที่ต้องการเชื่อมต่อข้อมูลอย่างปลอดภัยและมีมาตรฐาน
               </p>
+
+              <div className="about-actions">
+                <button
+                  type="button"
+                  className="about-primary-btn"
+                  onClick={() => onNavigate("api-products")}
+                >
+                  Explore API
+                </button>
+
+                <button
+                  type="button"
+                  className="about-secondary-btn"
+                  onClick={() => onNavigate("packages")}
+                >
+                  View Pricing
+                </button>
+              </div>
             </div>
 
             <div className="about-hero-right">
@@ -71,14 +94,17 @@ export default function HomePage({ onNavigate, user, onLogout }) {
                   <div className="about-mini-number">99.9%</div>
                   <div className="about-mini-label">พร้อมใช้งาน</div>
                 </div>
+
                 <div className="about-mini-card">
                   <div className="about-mini-number">Secure</div>
                   <div className="about-mini-label">Authentication</div>
                 </div>
+
                 <div className="about-mini-card">
                   <div className="about-mini-number">API</div>
                   <div className="about-mini-label">Ready for Integration</div>
                 </div>
+
                 <div className="about-mini-card">
                   <div className="about-mini-number">Scale</div>
                   <div className="about-mini-label">From Trial to Enterprise</div>

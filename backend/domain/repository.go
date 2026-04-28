@@ -5,6 +5,8 @@ type UserRepository interface {
 	GetByEmail(email string) (User, error)
 	GetByID(id int64) (User, error)
 	GetAll() ([]User, error)
+	UpdateRoleAndPlan(id int64, role string, plan string) error
+	Delete(id int64) error
 }
 
 type PatientRepository interface {
@@ -43,13 +45,4 @@ type UsageRepository interface {
 type APIProductRepository interface {
 	List() ([]APIProduct, error)
 	GetBySlug(slug string) (APIProduct, error)
-}
-
-type UserRepository interface {
-	Create(user User) (User, error)
-	GetByEmail(email string) (User, error)
-	GetByID(id int64) (User, error)
-	GetAll() ([]User, error)
-	UpdateRoleAndPlan(id int64, role string, plan string) error
-	Delete(id int64) error
 }

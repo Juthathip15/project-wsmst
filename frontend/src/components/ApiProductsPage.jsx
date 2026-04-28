@@ -70,15 +70,13 @@ export default function ApiProductsPage({
                 ดู API Docs
               </button>
 
-              {!user && (
-                <button
-                  type="button"
-                  className="api-products-secondary-btn"
-                  onClick={onLoginClick}
-                >
-                  เริ่มใช้งาน
-                </button>
-              )}
+              <button
+                type="button"
+                className="api-products-secondary-btn"
+                onClick={() => onNavigate("playground")}
+              >
+                Try Playground
+              </button>
             </div>
           </div>
 
@@ -102,7 +100,7 @@ export default function ApiProductsPage({
             </div>
           )}
 
-          {!loading && !error && (
+          {!loading && !error && apiProducts.length > 0 && (
             <div className="api-products-grid">
               {apiProducts.map((api) => (
                 <div key={api.id} className="api-product-card">
@@ -140,27 +138,30 @@ export default function ApiProductsPage({
                   </div>
 
                   <div className="api-product-actions">
-  <button
-    className="api-product-btn"
-    onClick={() => onOpenDocs(api.slug)}
-  >
-    ดู Docs
-  </button>
+                    <button
+                      type="button"
+                      className="api-product-btn"
+                      onClick={() => onOpenDocs(api.slug)}
+                    >
+                      ดู Docs
+                    </button>
 
-  <button
-    className="api-product-btn"
-    onClick={() => onNavigate("playground")}
-  >
-    Try API
-  </button>
+                    <button
+                      type="button"
+                      className="api-product-btn"
+                      onClick={() => onNavigate("playground")}
+                    >
+                      Try API
+                    </button>
 
-  <button
-    className="api-product-btn"
-    onClick={() => onNavigate("packages")}
-  >
-    Upgrade Plan
-  </button>
-</div>
+                    <button
+                      type="button"
+                      className="api-product-btn"
+                      onClick={() => onNavigate("packages")}
+                    >
+                      Upgrade Plan
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -14,7 +14,11 @@ export default function Navbar({
           onClick={() => onNavigate(isAdmin ? "admin-dashboard" : "home")}
           style={{ cursor: "pointer" }}
         >
-          โลโก้
+          <img
+            src="/logo.png"
+            alt="Health Love API Logo"
+            className="home-logo-img"
+          />
         </div>
 
         <nav className="home-nav">
@@ -68,14 +72,6 @@ export default function Navbar({
                 onClick={() => onNavigate("api-products")}
               >
                 API Products
-              </button>
-
-              <button
-                type="button"
-                className={`home-nav-link ${activePage === "docs" ? "active" : ""}`}
-                onClick={() => onNavigate("docs")}
-              >
-                Docs
               </button>
 
               <button
