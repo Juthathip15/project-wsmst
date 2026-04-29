@@ -717,8 +717,9 @@ pre {
 }
 
 .package-container {
-  max-width: 1200px;
+   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 24px;
 }
 
 .package-title {
@@ -741,21 +742,18 @@ pre {
 
 .package-grid {
   display: grid;
-  grid-template-columns: repeat(3, 280px);
-  justify-content: center;
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
 }
 
 .package-plan-card {
-  background: #ffffff;
-  border: 1px solid var(--border);
+   padding: 28px 24px;
   border-radius: 20px;
-  padding: 24px 20px;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
   display: flex;
   flex-direction: column;
-  min-height: 100%;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  justify-content: space-between;
 }
 
 .package-plan-card:hover {
@@ -3988,4 +3986,405 @@ pre {
   .payment-status-summary strong {
     text-align: left;
   }
+}
+.checkout-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.checkout-modal {
+  position: relative;
+  width: min(960px, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #f5f7fb;
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.25);
+}
+
+.checkout-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.checkout-page-modal {
+  min-height: auto;
+}
+
+.checkout-page-modal .checkout-section {
+  padding: 48px 24px 32px;
+}
+
+.checkout-page-modal .checkout-container {
+  max-width: 860px;
+}
+/* ===== CHECKOUT MODAL ===== */
+
+.checkout-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  backdrop-filter: blur(4px);
+}
+
+.checkout-modal {
+  position: relative;
+  width: min(900px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #f5f7fb;
+  border-radius: 20px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.25);
+}
+
+/* ปุ่ม X ปิด */
+.checkout-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: none;
+  background: #ffffff;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.checkout-modal-close:hover {
+  background: #f1f5f9;
+}
+
+/* ปรับ layout ตอนอยู่ใน modal */
+.checkout-page-modal {
+  min-height: auto;
+}
+
+.checkout-page-modal .checkout-section {
+  padding: 40px 20px;
+}
+
+.checkout-page-modal .checkout-container {
+  max-width: 800px;
+}
+
+.payment-success-modal {
+  width: min(680px, 100%);
+}
+
+.payment-status-page-modal {
+  min-height: auto;
+  background: transparent;
+}
+
+.payment-status-page-modal .payment-status-section {
+  padding: 40px 24px;
+}
+.docs-lock-box {
+  margin: 16px 0 20px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.docs-copy-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.api-product-locked-badge {
+   display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+/* ===== AUTH CARD DESIGN ===== */
+
+.auth-layout {
+  min-height: 100vh;
+  padding: 40px 24px;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 32%),
+    linear-gradient(180deg, #eef3ff 0%, #f4f7fb 100%);
+}
+
+.auth-canvas {
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-form-wrap {
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  padding: 34px 32px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+}
+
+.auth-heading {
+  margin-bottom: 26px;
+  color: #111827;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.auth-form {
+  gap: 14px;
+}
+
+.auth-input {
+  height: 46px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #dbe3f0;
+}
+
+.auth-input:focus {
+  background: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+}
+
+.auth-primary-btn {
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1b1d5a 0%, #2563eb 100%);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
+}
+
+.auth-primary-btn:hover {
+  background: linear-gradient(135deg, #151747 0%, #1d4ed8 100%);
+}
+
+.auth-footer-links {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #eef2f7;
+}
+
+.auth-text-btn {
+  font-weight: 700;
+}
+.register-plan-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.register-plan-card {
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #dbe3f0;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.register-plan-card:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.register-plan-card.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+.register-plan-card strong {
+  color: #111827;
+  font-size: 15px;
+}
+
+.register-plan-card span {
+  color: #1b1d5a;
+  font-weight: 800;
+}
+
+.register-plan-card small {
+  color: #64748b;
+  line-height: 1.5;
+}
+/* ===== SILVER BADGE ===== */
+.api-product-tag.silver,
+.package-silver {
+  background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
+  color: #111827;
+  border: 1px solid #cbd5f5;
+}
+
+/* ===== SILVER CARD (optional ถ้าอยากให้ทั้งการ์ดเงิน) ===== */
+.api-product-card.silver-highlight {
+  border: 1px solid #d1d5db;
+  background: linear-gradient(180deg, #f9fafb 0%, #f1f5f9 100%);
+}
+.api-product-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.api-product-tag.basic,
+.api-product-plan-badge.basic {
+  background: #eef2f7;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.api-product-tag.silver,
+.api-product-plan-badge.silver {
+  background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 55%, #94a3b8 100%);
+  color: #111827;
+  border: 1px solid #cbd5e1;
+}
+
+.api-product-tag.gold,
+.api-product-plan-badge.gold {
+  background: linear-gradient(135deg, #fef3c7 0%, #facc15 55%, #f59e0b 100%);
+  color: #111827;
+  border: 1px solid #f59e0b;
+}
+
+.api-product-plan-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.api-product-card-basic {
+  border-color: #e5e7eb;
+}
+
+.api-product-card-silver {
+  border-color: #cbd5e1;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.api-product-card-gold {
+  border-color: #fde68a;
+  background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+}
+/* ===== PLAN TEXT COLOR ===== */
+
+.plan-text.silver {
+  color: #64748b; /* เงิน */
+  font-weight: 800;
+}
+
+.plan-text.gold {
+  color: #f59e0b; /* ทอง */
+  font-weight: 800;
+}
+
+.plan-text.basic {
+  color: #475569;
+  font-weight: 800;
+}
+/* ===== PLAN COLOR SYSTEM ===== */
+
+.plan-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.plan-badge.basic {
+  background: #eef2f7;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.plan-badge.silver {
+  background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 55%, #94a3b8 100%);
+  color: #111827;
+  border: 1px solid #cbd5e1;
+}
+
+.plan-badge.gold {
+  background: linear-gradient(135deg, #fef3c7 0%, #facc15 55%, #f59e0b 100%);
+  color: #111827;
+  border: 1px solid #f59e0b;
+}
+
+.plan-text {
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.plan-text.basic {
+  color: #475569;
+}
+
+.plan-text.silver {
+  color: #64748b;
+}
+
+.plan-text.gold {
+  color: #f59e0b;
+}
+
+.plan-card-basic {
+  border-color: #e5e7eb;
+}
+
+.plan-card-silver {
+  border-color: #cbd5e1 !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.plan-card-gold {
+  border-color: #fde68a !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
 }

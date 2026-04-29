@@ -6,16 +6,25 @@ export default function PaymentStatusPage({
   user,
   onLogout,
   paymentPlan,
+  isModal = false,
 }) {
   return (
-    <div className="payment-status-page">
-      <Navbar
-        onNavigate={onNavigate}
-        onLoginClick={onLoginClick}
-        user={user}
-        onLogout={onLogout}
-        activePage="packages"
-      />
+    <div
+      className={
+        isModal
+          ? "payment-status-page payment-status-page-modal"
+          : "payment-status-page"
+      }
+    >
+      {!isModal && (
+        <Navbar
+          onNavigate={onNavigate}
+          onLoginClick={onLoginClick}
+          user={user}
+          onLogout={onLogout}
+          activePage="packages"
+        />
+      )}
 
       <section className="payment-status-section">
         <div className="payment-status-card">

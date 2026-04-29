@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import { getApiProductBySlug } from "../api/api";
 
+const basicCopyAllowedSlugs = [
+  "health-service-search",
+  "basic-bmi-calculator",
+  "basic-blood-pressure-check",
+  "basic-health-package-list",
+];
+
 export default function DocsPage({
   slug,
   selectedProductKey,
@@ -11,6 +18,7 @@ export default function DocsPage({
   user,
 }) {
   const activeSlug = slug || selectedProductKey || "health-risk-score";
+  const currentPlan = user?.plan || "basic";
 
   const [doc, setDoc] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +52,37 @@ export default function DocsPage({
     }
   }
 
+  const canCopy =
+    currentPlan === "gold"
+      ? true
+      : currentPlan === "silver"
+      ? doc?.availablePlans?.toLowerCase().includes("silver")
+      : basicCopyAllowedSlugs.includes(doc?.slug || activeSlug);
+
+  const getCopyMessage = () => {
+    if (currentPlan === "basic") {
+      return "แพลน Basic คัดลอกได้เฉพาะ API พื้นฐานบางรายการเท่านั้น";
+    }
+
+    if (currentPlan === "silver") {
+      return "API นี้ต้องใช้แพลน Gold จึงจะคัดลอกได้";
+    }
+
+    return "แพลนของคุณยังไม่สามารถคัดลอก API นี้ได้";
+  };
+
   const copyText = async (label, value) => {
+    if (!user) {
+      alert("กรุณาเข้าสู่ระบบก่อนคัดลอก API");
+      onLoginClick();
+      return;
+    }
+
+    if (!canCopy) {
+      alert(getCopyMessage());
+      return;
+    }
+
     try {
       await navigator.clipboard.writeText(value || "");
       setCopied(label);
@@ -111,8 +149,13 @@ export default function DocsPage({
                       type="button"
                       className="docs-copy-btn"
                       onClick={() => copyText("endpoint", doc.endpoint)}
+                      disabled={!canCopy}
                     >
-                      {copied === "endpoint" ? "Copied" : "Copy Endpoint"}
+                      {copied === "endpoint"
+                        ? "Copied"
+                        : canCopy
+                        ? "Copy Endpoint"
+                        : "Locked"}
                     </button>
 
                     <button
@@ -124,6 +167,13 @@ export default function DocsPage({
                     </button>
                   </div>
                 </div>
+
+                {!canCopy && (
+                  <div className="docs-lock-box">
+                    {getCopyMessage()} หากต้องการคัดลอก Endpoint / Request /
+                    Response กรุณาอัปเกรดแพลน
+                  </div>
+                )}
 
                 <div className="docs-block">
                   <p className="docs-label">Description</p>
@@ -148,6 +198,15 @@ export default function DocsPage({
                 <div className="docs-block">
                   <p className="docs-label">Available Plans</p>
                   <p>{doc.availablePlans}</p>
+                </div>
+
+                <div className="docs-block">
+                  <p className="docs-label">Copy Permission</p>
+                  <p>
+                    {canCopy
+                      ? "แพลนของคุณสามารถคัดลอก API นี้ได้"
+                      : getCopyMessage()}
+                  </p>
                 </div>
 
                 <div className="docs-block">
@@ -177,8 +236,13 @@ export default function DocsPage({
                         onClick={() =>
                           copyText("request", formatJSON(doc.sampleRequest))
                         }
+                        disabled={!canCopy}
                       >
-                        {copied === "request" ? "Copied" : "Copy"}
+                        {copied === "request"
+                          ? "Copied"
+                          : canCopy
+                          ? "Copy"
+                          : "Locked"}
                       </button>
                     </div>
 
@@ -196,8 +260,13 @@ export default function DocsPage({
                         onClick={() =>
                           copyText("response", formatJSON(doc.sampleResponse))
                         }
+                        disabled={!canCopy}
                       >
-                        {copied === "response" ? "Copied" : "Copy"}
+                        {copied === "response"
+                          ? "Copied"
+                          : canCopy
+                          ? "Copy"
+                          : "Locked"}
                       </button>
                     </div>
 
@@ -206,6 +275,17 @@ export default function DocsPage({
                     </pre>
                   </div>
                 </div>
+
+                {!canCopy && (
+                  <button
+                    type="button"
+                    className="checkout-primary-btn"
+                    style={{ marginTop: 20 }}
+                    onClick={() => onNavigate("packages")}
+                  >
+                    อัปเกรดแพลนเพื่อคัดลอก API นี้
+                  </button>
+                )}
               </div>
             </div>
           )}

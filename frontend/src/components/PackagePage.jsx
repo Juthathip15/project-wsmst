@@ -6,45 +6,57 @@ const packagePlans = [
     title: "Basic",
     price: "ฟรี",
     priceValue: 0,
-    description: "เหมาะสำหรับการทดลองใช้งาน API เบื้องต้น",
+    description: "เหมาะสำหรับทดลองใช้งาน API เบื้องต้น",
     quota: "1,000 requests/เดือน",
     rate: "10 req/นาที",
+    accessLevel: "Basic API เท่านั้น",
+    copyAccess: "คัดลอกได้เฉพาะ API พื้นฐาน",
     features: [
-      "1,000 requests/เดือน",
-      "Rate limit: 10 req/นาที",
+      "เข้าถึง API พื้นฐาน",
+      "คัดลอกโค้ดได้เฉพาะ Basic API",
+      "ดูตัวอย่าง Request / Response เบื้องต้น",
       "Basic search",
       "Read-only access",
+      "เหมาะสำหรับทดลองระบบ",
     ],
   },
   {
     key: "silver",
     title: "Silver",
-    price: "฿999/เดือน",
-    priceValue: 999,
-    description: "เหมาะสำหรับ partner ที่ต้องการใช้งานจริงระดับกลาง",
+    price: "฿69/เดือน",
+    priceValue: 69,
+    description: "เหมาะสำหรับใช้งานจริงระดับกลาง",
     quota: "50,000 requests/เดือน",
     rate: "100 req/นาที",
+    accessLevel: "Basic API + Advanced API",
+    copyAccess: "คัดลอกโค้ด API ได้มากขึ้น",
     recommended: true,
     features: [
-      "50,000 requests/เดือน",
-      "Rate limit: 100 req/นาที",
-      "Advanced filters",
-      "Usage dashboard",
+      "เข้าถึง Basic API และ Advanced API",
+      "คัดลอกโค้ด API ได้มากกว่าแพลนฟรี",
+      "ใช้งาน Advanced filters",
+      "ดู Usage Dashboard",
+      "รองรับงาน integration ระดับกลาง",
+      "เหมาะสำหรับ partner หรือทีมพัฒนา",
     ],
   },
   {
     key: "gold",
     title: "Gold",
-    price: "฿4,999/เดือน",
-    priceValue: 4999,
+    price: "฿99/เดือน",
+    priceValue: 99,
     description: "เหมาะสำหรับการใช้งานระดับสูงและ integration เต็มรูปแบบ",
     quota: "Unlimited requests",
     rate: "1,000 req/นาที",
+    accessLevel: "เข้าถึง API ทุกประเภท",
+    copyAccess: "คัดลอกโค้ด API ได้ทุก endpoint",
     features: [
-      "Unlimited requests",
-      "Rate limit: 1,000 req/นาที",
+      "เข้าถึง API ทุกประเภท",
+      "คัดลอกโค้ด API ได้ทุก endpoint",
+      "ใช้งาน API ที่ซับซ้อน / Advanced Integration",
       "Full-text + AI search",
-      "Analytics + export",
+      "Analytics + Export",
+      "เหมาะสำหรับองค์กรหรือระบบขนาดใหญ่",
     ],
   },
 ];
@@ -83,10 +95,10 @@ export default function PackagePage({
       <section className="package-section">
         <div className="package-container">
           <div className="package-header">
-            <span className="package-badge">Pricing Plans</span>
-            <h2 className="package-title">แพ็คเกจ</h2>
+            <span className="package-badge">Service Packages</span>
+            <h2 className="package-title">Package API</h2>
             <p className="package-subtitle">
-              เลือกแพ็คเกจที่เหมาะกับการใช้งาน API ของคุณ
+              เลือกแพ็คเกจตามระดับการเข้าถึง API และสิทธิ์การคัดลอกโค้ด
             </p>
           </div>
 
@@ -126,9 +138,20 @@ export default function PackagePage({
                       <span>Quota</span>
                       <strong>{plan.quota}</strong>
                     </div>
+
                     <div>
                       <span>Rate Limit</span>
                       <strong>{plan.rate}</strong>
+                    </div>
+
+                    <div>
+                      <span>API Access</span>
+                      <strong>{plan.accessLevel}</strong>
+                    </div>
+
+                    <div>
+                      <span>Copy Permission</span>
+                      <strong>{plan.copyAccess}</strong>
                     </div>
                   </div>
 

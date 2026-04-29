@@ -85,7 +85,7 @@ export default function DeveloperPage({
                 className="developer-secondary-btn"
                 onClick={() => onNavigate("api-products")}
               >
-                ดู API Products
+                ดู สินค้า API
               </button>
             </div>
           </div>

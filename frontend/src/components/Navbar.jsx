@@ -29,7 +29,7 @@ export default function Navbar({
                 className={`home-nav-link ${activePage === "admin-dashboard" ? "active" : ""}`}
                 onClick={() => onNavigate("admin-dashboard")}
               >
-                Admin Dashboard
+                แดชบอร์ดผู้ดูแล
               </button>
 
               <button
@@ -71,7 +71,7 @@ export default function Navbar({
                 className={`home-nav-link ${activePage === "api-products" ? "active" : ""}`}
                 onClick={() => onNavigate("api-products")}
               >
-                API Products
+                สินค้า API
               </button>
 
               <button
@@ -79,7 +79,7 @@ export default function Navbar({
                 className={`home-nav-link ${activePage === "playground" ? "active" : ""}`}
                 onClick={() => onNavigate("playground")}
               >
-                Playground
+                ทดลองใช้งาน
               </button>
 
               <button
@@ -87,7 +87,7 @@ export default function Navbar({
                 className={`home-nav-link ${activePage === "packages" ? "active" : ""}`}
                 onClick={() => onNavigate("packages")}
               >
-                แพ็คเกจ
+                แพ็กเกจ
               </button>
 
               {user && (
@@ -97,7 +97,7 @@ export default function Navbar({
                     className={`home-nav-link ${activePage === "developer" ? "active" : ""}`}
                     onClick={() => onNavigate("developer")}
                   >
-                    Developer
+                    นักพัฒนา
                   </button>
 
                   <button
@@ -127,7 +127,7 @@ export default function Navbar({
               className="home-logout-btn"
               onClick={onLogout}
             >
-              Logout
+              ออกจากระบบ
             </button>
           </div>
         ) : (
@@ -136,7 +136,7 @@ export default function Navbar({
             className="home-login-btn"
             onClick={onLoginClick}
           >
-            Login
+            เข้าสู่ระบบ
           </button>
         )}
       </div>

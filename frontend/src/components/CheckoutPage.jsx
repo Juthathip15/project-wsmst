@@ -8,44 +8,53 @@ export default function CheckoutPage({
   onLogout,
   selectedPlan,
   onPaymentSuccess,
+  onClose,
+  isModal = false,
 }) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  if (!selectedPlan) {
-    return (
-      <div className="checkout-page">
-        <Navbar
-          onNavigate={onNavigate}
-          onLoginClick={onLoginClick}
-          user={user}
-          onLogout={onLogout}
-          activePage="packages"
-        />
+  const pendingRegisterUser = JSON.parse(
+    localStorage.getItem("pendingRegisterUser") || "null"
+  );
 
-        <section className="checkout-section">
-          <div className="checkout-container">
-            <div className="checkout-card">
-              <h1 className="checkout-title">ไม่มีแพ็คเกจที่เลือก</h1>
-              <p className="checkout-subtitle">
-                กรุณากลับไปเลือกแพ็คเกจก่อนทำรายการ
-              </p>
-              <button
-                type="button"
-                className="checkout-primary-btn"
-                onClick={() => onNavigate("packages")}
-              >
-                กลับไปเลือกแพ็คเกจ
-              </button>
-            </div>
-          </div>
-        </section>
-      </div>
-    );
-  }
+  const accountEmail = user?.email || pendingRegisterUser?.email || "-";
 
-  const handleConfirm = async () => {
-  try {
+  const handleRegisterPayment = async () => {
+    if (!pendingRegisterUser) {
+      setErrorMessage("ไม่พบข้อมูลลงทะเบียน กรุณากลับไปกรอกข้อมูลใหม่");
+      return;
+    }
+
+    const response = await fetch("http://127.0.0.1:8080/api/v1/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pendingRegisterUser),
+    });
+
+    const text = await response.text();
+
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = text;
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        typeof data === "string" ? data : data?.message || "ลงทะเบียนล้มเหลว"
+      );
+    }
+
+    localStorage.removeItem("pendingRegisterUser");
+    alert("ลงทะเบียนและชำระเงินสำเร็จ ✅");
+
+    if (onClose) onClose();
+    onNavigate("login");
+  };
+
+  const handleUpgradePayment = async () => {
     const token = localStorage.getItem("token");
 
     const response = await fetch("http://localhost:8080/api/v1/subscriptions", {
@@ -62,31 +71,79 @@ export default function CheckoutPage({
     const data = await response.json();
 
     if (!response.ok) {
-      alert(data?.message || "ชำระเงินไม่สำเร็จ");
-      return;
+      throw new Error(data?.message || "ชำระเงินไม่สำเร็จ");
     }
 
-    // 👉 เรียก App
     if (onPaymentSuccess) {
       onPaymentSuccess(selectedPlan);
     }
+  };
 
-    // 👉 ไปหน้า success
-    onNavigate("payment-status");
+  const handleConfirm = async () => {
+    setLoading(true);
+    setErrorMessage("");
 
-  } catch {
-    alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ ❌");
+    try {
+      if (pendingRegisterUser && !user) {
+        await handleRegisterPayment();
+      } else {
+        await handleUpgradePayment();
+      }
+    } catch (err) {
+      setErrorMessage(err.message || "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!selectedPlan) {
+    return (
+      <div className={isModal ? "checkout-page checkout-page-modal" : "checkout-page"}>
+        {!isModal && (
+          <Navbar
+            onNavigate={onNavigate}
+            onLoginClick={onLoginClick}
+            user={user}
+            onLogout={onLogout}
+            activePage="packages"
+          />
+        )}
+
+        <section className="checkout-section">
+          <div className="checkout-container">
+            <div className="checkout-card">
+              <h1 className="checkout-title">ไม่มีแพ็คเกจที่เลือก</h1>
+              <p className="checkout-subtitle">
+                กรุณากลับไปเลือกแพ็คเกจก่อนทำรายการ
+              </p>
+              <button
+                type="button"
+                className="checkout-primary-btn"
+                onClick={() => {
+                  if (onClose) onClose();
+                  onNavigate("packages");
+                }}
+              >
+                กลับไปเลือกแพ็คเกจ
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
   }
-};
+
   return (
-    <div className="checkout-page">
-      <Navbar
-        onNavigate={onNavigate}
-        onLoginClick={onLoginClick}
-        user={user}
-        onLogout={onLogout}
-        activePage="packages"
-      />
+    <div className={isModal ? "checkout-page checkout-page-modal" : "checkout-page"}>
+      {!isModal && (
+        <Navbar
+          onNavigate={onNavigate}
+          onLoginClick={onLoginClick}
+          user={user}
+          onLogout={onLogout}
+          activePage="packages"
+        />
+      )}
 
       <section className="checkout-section">
         <div className="checkout-container">
@@ -107,19 +164,28 @@ export default function CheckoutPage({
               <p className="checkout-description">{selectedPlan.description}</p>
 
               <div className="checkout-detail-list">
-                <div className="checkout-detail-item">
-                  <span>Quota</span>
-                  <strong>{selectedPlan.quota}</strong>
-                </div>
+                {selectedPlan.quota && (
+                  <div className="checkout-detail-item">
+                    <span>Quota</span>
+                    <strong>{selectedPlan.quota}</strong>
+                  </div>
+                )}
 
-                <div className="checkout-detail-item">
-                  <span>Rate Limit</span>
-                  <strong>{selectedPlan.rate}</strong>
-                </div>
+                {selectedPlan.rate && (
+                  <div className="checkout-detail-item">
+                    <span>Rate Limit</span>
+                    <strong>{selectedPlan.rate}</strong>
+                  </div>
+                )}
 
                 <div className="checkout-detail-item">
                   <span>Account</span>
-                  <strong>{user?.email || "-"}</strong>
+                  <strong>{accountEmail}</strong>
+                </div>
+
+                <div className="checkout-detail-item">
+                  <span>Package</span>
+                  <strong>{selectedPlan.title}</strong>
                 </div>
               </div>
             </div>
@@ -132,7 +198,7 @@ export default function CheckoutPage({
                 <div>
                   <p className="checkout-payment-title">โอน / PromptPay</p>
                   <p className="checkout-payment-text">
-                    Demo payment สำหรับจำลองขั้นตอนการชำระเงิน
+                    Demo payment สำหรับขั้นตอนการชำระเงิน
                   </p>
                 </div>
               </div>
@@ -143,20 +209,22 @@ export default function CheckoutPage({
                 onClick={handleConfirm}
                 disabled={loading}
               >
-                {loading ? "กำลังยืนยัน..." : "ยืนยันการชำระเงินจำลอง"}
+                {loading ? "กำลังยืนยัน..." : "ยืนยันการชำระเงิน"}
               </button>
 
               <button
                 type="button"
                 className="checkout-secondary-btn"
-                onClick={() => onNavigate("packages")}
+                onClick={() => {
+                  if (onClose) onClose();
+                }}
                 disabled={loading}
               >
-                กลับไปเลือกแพ็คเกจ
+                กลับไปแก้ไขข้อมูล
               </button>
 
               <p className="checkout-note">
-                Demo นี้ไม่ตัดเงินจริง แต่จะอัปเดตแพ็คเกจในระบบจริง
+                Demo นี้ไม่ตัดเงินจริง แต่จะอัปเดตข้อมูลในระบบ
               </p>
             </div>
           </div>

@@ -21,6 +21,8 @@ export default function App() {
   const [selectedProductKey, setSelectedProductKey] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [paymentPlan, setPaymentPlan] = useState(null);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [showPaymentSuccessModal, setShowPaymentSuccessModal] = useState(false);
 
   const [user, setUser] = useState(null);
   const [usage, setUsage] = useState({
@@ -87,6 +89,8 @@ export default function App() {
     setUser(null);
     setSelectedPlan(null);
     setPaymentPlan(null);
+    setShowCheckoutModal(false);
+    setShowPaymentSuccessModal(false);
 
     setUsage({
       plan: "basic",
@@ -105,199 +109,311 @@ export default function App() {
 
   const handleCheckout = (plan) => {
     setSelectedPlan(plan);
-    setPage("checkout");
+    setShowCheckoutModal(true);
+    setShowPaymentSuccessModal(false);
+  };
+
+  const handleCloseCheckout = () => {
+    setShowCheckoutModal(false);
+  };
+
+  const handleClosePaymentSuccess = () => {
+    setShowPaymentSuccessModal(false);
   };
 
   const handlePaymentSuccess = (plan) => {
-  setPaymentPlan(plan);
+    setPaymentPlan(plan);
 
-  const updatedUser = {
-    ...user,
-    plan: plan.key,
+    const updatedUser = {
+      ...user,
+      plan: plan.key,
+    };
+
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+
+    const updatedUsage = {
+      plan: plan.key,
+      quotaUsed: 0,
+      quotaLimit:
+        plan.key === "basic" ? 1000 : plan.key === "silver" ? 50000 : 999999999,
+      remaining:
+        plan.key === "basic" ? 1000 : plan.key === "silver" ? 50000 : 999999999,
+    };
+
+    setUsage(updatedUsage);
+    localStorage.setItem("usage", JSON.stringify(updatedUsage));
+
+    setShowCheckoutModal(false);
+    setShowPaymentSuccessModal(true);
   };
 
-  setUser(updatedUser);
-  localStorage.setItem("user", JSON.stringify(updatedUser));
-
-  const updatedUsage = {
-    plan: plan.key,
-    quotaUsed: 0,
-    quotaLimit:
-      plan.key === "basic" ? 1000 :
-      plan.key === "silver" ? 50000 : 999999999,
-    remaining:
-      plan.key === "basic" ? 1000 :
-      plan.key === "silver" ? 50000 : 999999999,
+  const navigateFromModal = (nextPage) => {
+    setShowCheckoutModal(false);
+    setShowPaymentSuccessModal(false);
+    setPage(nextPage);
   };
 
-  setUsage(updatedUsage);
-  localStorage.setItem("usage", JSON.stringify(updatedUsage));
-};
+  const renderCheckoutModal = () => {
+    if (!showCheckoutModal) return null;
+
+    return (
+      <div className="checkout-modal-overlay">
+        <div className="checkout-modal">
+          <button
+            type="button"
+            className="checkout-modal-close"
+            onClick={handleCloseCheckout}
+          >
+            ×
+          </button>
+
+          <CheckoutPage
+            isModal
+            onNavigate={navigateFromModal}
+            onClose={handleCloseCheckout}
+            onLoginClick={() => navigateFromModal("login")}
+            user={user}
+            onLogout={handleLogout}
+            selectedPlan={selectedPlan}
+            onPaymentSuccess={handlePaymentSuccess}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const renderPaymentSuccessModal = () => {
+    if (!showPaymentSuccessModal) return null;
+
+    return (
+      <div className="checkout-modal-overlay">
+        <div className="checkout-modal payment-success-modal">
+          <button
+            type="button"
+            className="checkout-modal-close"
+            onClick={handleClosePaymentSuccess}
+          >
+            ×
+          </button>
+
+          <PaymentStatusPage
+            isModal
+            onNavigate={navigateFromModal}
+            onLoginClick={() => navigateFromModal("login")}
+            user={user}
+            onLogout={handleLogout}
+            paymentPlan={paymentPlan}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const renderModals = () => (
+    <>
+      {renderCheckoutModal()}
+      {renderPaymentSuccessModal()}
+    </>
+  );
 
   if (page === "login") {
     return (
-      <LoginForm
-        onNavigate={setPage}
-        onLoginSuccess={handleLoginSuccess}
-      />
+      <>
+        <LoginForm onNavigate={setPage} onLoginSuccess={handleLoginSuccess} />
+        {renderModals()}
+      </>
     );
   }
 
   if (page === "reset-password") {
-    return <ResetPasswordPage onNavigate={setPage} />;
+    return (
+      <>
+        <ResetPasswordPage onNavigate={setPage} />
+        {renderModals()}
+      </>
+    );
   }
 
   if (page === "register") {
-    return <RegisterForm onNavigate={setPage} />;
+    return (
+      <>
+        <RegisterForm onNavigate={setPage} onCheckout={handleCheckout} />
+        {renderModals()}
+      </>
+    );
   }
 
   if (page === "admin-dashboard") {
     return (
-      <AdminDashboardPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        onLogout={handleLogout}
-      />
+      <>
+        <AdminDashboardPage
+          onNavigate={setPage}
+          onLoginClick={() => setPage("login")}
+          user={user}
+          onLogout={handleLogout}
+        />
+        {renderModals()}
+      </>
     );
   }
 
   if (page === "admin-accounts") {
     return (
-      <AdminAccountsPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        onLogout={handleLogout}
-      />
+      <>
+        <AdminAccountsPage
+          onNavigate={setPage}
+          onLoginClick={() => setPage("login")}
+          user={user}
+          onLogout={handleLogout}
+        />
+        {renderModals()}
+      </>
     );
   }
 
   if (page === "admin-packages") {
     return (
-      <AdminPackagesPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        onLogout={handleLogout}
-      />
+      <>
+        <AdminPackagesPage
+          onNavigate={setPage}
+          onLoginClick={() => setPage("login")}
+          user={user}
+          onLogout={handleLogout}
+        />
+        {renderModals()}
+      </>
     );
   }
 
   if (page === "admin-api-products") {
     return (
-      <AdminApiProductsPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        onLogout={handleLogout}
-      />
+      <>
+        <AdminApiProductsPage
+          onNavigate={setPage}
+          onLoginClick={() => setPage("login")}
+          user={user}
+          onLogout={handleLogout}
+        />
+        {renderModals()}
+      </>
     );
   }
 
   if (page === "api-products") {
     return (
-      <ApiProductsPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        onOpenDocs={handleOpenDocs}
-        user={user}
-        onLogout={handleLogout}
-      />
+      <>
+        <ApiProductsPage
+          onNavigate={setPage}
+          onLoginClick={() => setPage("login")}
+          onOpenDocs={handleOpenDocs}
+          user={user}
+          onLogout={handleLogout}
+        />
+        {renderModals()}
+      </>
     );
   }
 
   if (page === "docs") {
     return (
-      <DocsPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        onOpenDocs={handleOpenDocs}
-        selectedProductKey={selectedProductKey}
-        user={user}
-        onLogout={handleLogout}
-      />
+      <>
+        <DocsPage
+          onNavigate={setPage}
+          onLoginClick={() => setPage("login")}
+          onOpenDocs={handleOpenDocs}
+          selectedProductKey={selectedProductKey}
+          user={user}
+          onLogout={handleLogout}
+        />
+        {renderModals()}
+      </>
     );
   }
 
   if (page === "packages") {
     return (
-      <PackagePage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        usage={usage}
-        onLogout={handleLogout}
-        onCheckout={handleCheckout}
-      />
+      <>
+        <PackagePage
+          onNavigate={setPage}
+          onLoginClick={() => setPage("login")}
+          user={user}
+          usage={usage}
+          onLogout={handleLogout}
+          onCheckout={handleCheckout}
+        />
+        {renderModals()}
+      </>
     );
   }
 
-  if (page === "checkout") {
-  return (
-    <CheckoutPage
-      onNavigate={setPage}
-      onLoginClick={() => setPage("login")}
-      user={user}
-      onLogout={handleLogout}
-      selectedPlan={selectedPlan}
-      onPaymentSuccess={handlePaymentSuccess}
-    />
-  );
-}
-
- if (page === "payment-status") {
-  return (
-    <PaymentStatusPage
-      onNavigate={setPage}
-      onLoginClick={() => setPage("login")}
-      user={user}
-      onLogout={handleLogout}
-      paymentPlan={paymentPlan}
-    />
-  );
-}
+  if (page === "payment-status") {
+    return (
+      <>
+        <PaymentStatusPage
+          onNavigate={setPage}
+          onLoginClick={() => setPage("login")}
+          user={user}
+          onLogout={handleLogout}
+          paymentPlan={paymentPlan}
+        />
+        {renderModals()}
+      </>
+    );
+  }
 
   if (page === "developer") {
     return (
-      <DeveloperPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        onLogout={handleLogout}
-      />
+      <>
+        <DeveloperPage
+          onNavigate={setPage}
+          onLoginClick={() => setPage("login")}
+          user={user}
+          onLogout={handleLogout}
+        />
+        {renderModals()}
+      </>
     );
   }
 
   if (page === "dashboard") {
     return (
-      <DashboardPage
-        onNavigate={setPage}
-        onLoginClick={() => setPage("login")}
-        user={user}
-        usage={usage}
-        onLogout={handleLogout}
-      />
+      <>
+        <DashboardPage
+          onNavigate={setPage}
+          onLoginClick={() => setPage("login")}
+          user={user}
+          usage={usage}
+          onLogout={handleLogout}
+        />
+        {renderModals()}
+      </>
     );
   }
 
   if (page === "playground") {
     return (
-      <PlaygroundPage
+      <>
+        <PlaygroundPage
+          onNavigate={setPage}
+          onLoginClick={() => setPage("login")}
+          user={user}
+          onLogout={handleLogout}
+        />
+        {renderModals()}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <HomePage
         onNavigate={setPage}
         onLoginClick={() => setPage("login")}
         user={user}
         onLogout={handleLogout}
       />
-    );
-  }
-
-  return (
-    <HomePage
-      onNavigate={setPage}
-      onLoginClick={() => setPage("login")}
-      user={user}
-      onLogout={handleLogout}
-    />
+      {renderModals()}
+    </>
   );
 }
