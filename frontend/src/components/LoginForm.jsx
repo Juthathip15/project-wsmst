@@ -47,6 +47,16 @@ export default function LoginForm({ onNavigate, onLoginSuccess }) {
     <div className="auth-layout">
       <div className="auth-canvas">
         <div className="auth-form-wrap">
+
+          {/* 🔙 ปุ่มย้อนกลับ */}
+          <button
+            type="button"
+            className="auth-back-btn"
+            onClick={() => onNavigate("home")}
+          >
+            ← กลับหน้าแรก
+          </button>
+
           <h1 className="auth-heading">เข้าสู่ระบบ</h1>
 
           {errorMessage && <p className="error">{errorMessage}</p>}

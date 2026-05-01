@@ -4388,3 +4388,16 @@ pre {
   border-color: #fde68a !important;
   background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
 }
+.auth-back-btn {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.auth-back-btn:hover {
+  color: #000;
+}

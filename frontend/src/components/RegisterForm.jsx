@@ -1,38 +1,14 @@
 import { useState } from "react";
 
-const plans = [
-  {
-    key: "basic",
-    title: "Basic",
-    price: "ฟรี",
-    description: "ทดลองใช้งาน API เบื้องต้น",
-  },
-  {
-    key: "silver",
-    title: "Silver",
-    price: "฿69/เดือน",
-    description: "เหมาะสำหรับใช้งานจริงระดับกลาง",
-  },
-  {
-    key: "gold",
-    title: "Gold",
-    price: "฿99/เดือน",
-    description: "เหมาะสำหรับการใช้งานระดับสูง",
-  },
-];
-
-export default function RegisterForm({ onNavigate, onCheckout }) {
+export default function RegisterForm({ onNavigate }) {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState("basic");
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const currentPlan =
-    plans.find((plan) => plan.key === selectedPlan) || plans[0];
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
 
@@ -41,20 +17,46 @@ export default function RegisterForm({ onNavigate, onCheckout }) {
       return;
     }
 
-    const registerUser = {
-      fullName,
-      email,
-      password,
-      plan: selectedPlan,
-    };
+    setLoading(true);
 
-    localStorage.setItem("pendingRegisterUser", JSON.stringify(registerUser));
-
-    if (onCheckout) {
-      onCheckout({
-        ...currentPlan,
-        registerData: registerUser,
+    try {
+      const response = await fetch("http://127.0.0.1:8080/api/v1/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName,
+          email,
+          password,
+          plan: "basic",
+        }),
       });
+
+      const text = await response.text();
+
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = text;
+      }
+
+      if (!response.ok) {
+        setErrorMessage(
+          typeof data === "string"
+            ? data
+            : data?.message || "ลงทะเบียนไม่สำเร็จ"
+        );
+        return;
+      }
+
+      alert("ลงทะเบียนสำเร็จ กรุณาเข้าสู่ระบบ");
+      onNavigate("login");
+    } catch {
+      setErrorMessage("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -115,29 +117,12 @@ export default function RegisterForm({ onNavigate, onCheckout }) {
               />
             </div>
 
-            <div className="auth-field">
-              <label className="auth-label">เลือกแพ็กเกจ</label>
+            <p className="auth-helper-text">
+              บัญชีใหม่จะเริ่มต้นที่แพ็กเกจ Basic ฟรี
+            </p>
 
-              <div className="register-plan-grid">
-                {plans.map((plan) => (
-                  <button
-                    key={plan.key}
-                    type="button"
-                    className={`register-plan-card ${
-                      selectedPlan === plan.key ? "active" : ""
-                    }`}
-                    onClick={() => setSelectedPlan(plan.key)}
-                  >
-                    <strong>{plan.title}</strong>
-                    <span>{plan.price}</span>
-                    <small>{plan.description}</small>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button type="submit" className="auth-primary-btn">
-              ไปหน้าชำระเงิน
+            <button type="submit" className="auth-primary-btn" disabled={loading}>
+              {loading ? "กำลังลงทะเบียน..." : "ลงทะเบียน"}
             </button>
           </form>
 
